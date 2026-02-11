@@ -1,0 +1,11 @@
+CREATE TABLE USUARIO (
+    id_usuario INTEGER NOT NULL PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    apellido VARCHAR(255) NOT NULL,
+    correo_electronico VARCHAR(255) NOT NULL,
+    fecha_registro TIMESTAMP WITH TIME ZONE NOT NULL,
+    salario_mensual_base NUMERIC(15,2) DEFAULT 0 NOT NULL,
+    estado VARCHAR(20) DEFAULT 'activo' NOT NULL,
+    CHECK (estado IN ('activo', 'inactivo')),
+    CHECK (salario_mensual_base >= 0)
+);
