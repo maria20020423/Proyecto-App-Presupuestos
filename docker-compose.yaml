@@ -10,3 +10,8 @@ services:
       - FIREBIRD_DATABASE_DEFAULT_CHARSET=UTF8
     volumes:
       - ./data:/var/lib/firebird/data
+
+
+    ports:
+    - 3050:3050
+
