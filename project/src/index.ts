@@ -15,6 +15,8 @@ app.use(express.json());
 
   client.connect("localhost/3050:/var/lib/firebird/data/mirror.fdb",options)
 
+  
+
 app.get('/', (req: Request, res: Response) => {
   res.send({ message: 'TypeScript API is humming along!' });
 });

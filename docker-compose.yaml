@@ -10,6 +10,7 @@ services:
       - FIREBIRD_DATABASE_DEFAULT_CHARSET=UTF8
     volumes:
       - ./data:/var/lib/firebird/data
+      - ./scripts:/opt/firebird/db_scripts
 
 
     ports:
