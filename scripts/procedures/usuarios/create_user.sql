@@ -1,4 +1,6 @@
-SET TERM ^;
+DROP PROCEDURE CREATE_USUARIO IF EXISTS;
+
+
 CREATE PROCEDURE CREATE_USUARIO (
     p_nombre VARCHAR(255),
     p_apellido VARCHAR(255),
@@ -8,8 +10,31 @@ CREATE PROCEDURE CREATE_USUARIO (
     p_estado VARCHAR(20)
 ) RETURNS (id_usuario INTEGER) AS
 BEGIN 
-INSERT INTO USUARIO (id_usuario,nombre,apellido,correo_electronico,fecha_registro,salario_mensual_base,estado)
-VALUES (NULL, :p_nombre, :p_apellido, :p_correo_electronico, :p_fecha_registro, :p_salario_mensual_base, :p_estado)
-RETURNING id_usuario INTO id_usuario;
-END^
-SET TERM ;^
+    INSERT INTO USUARIO (
+        nombre,   
+        apellido,
+        correo_electronico,
+        fecha_registro,
+        salario_mensual_base,
+        estado
+    )
+    VALUES (
+        :p_nombre,
+        :p_apellido,
+        :p_correo_electronico,
+        :p_fecha_registro,
+        :p_salario_mensual_base,
+        :p_estado
+    )
+    RETURNING id_usuario INTO :id_usuario;  
+END
+
+
+EXECUTE PROCEDURE CREATE_USUARIO(
+    'Maria', 
+    'García', 
+    'm.garcia@email.com', 
+    CURRENT_TIMESTAMP, 
+    3200.00, 
+    'activo'
+)
