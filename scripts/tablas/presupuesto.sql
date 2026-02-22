@@ -13,5 +13,7 @@ CREATE TABLE PRESUPUESTO (
     estado VARCHAR(20) NOT NULL DEFAULT 'borrador',
     creado_en TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     modificado_en TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    creado_por INTEGER
+    creado_por INTEGER,
+    CHECK(mes_inicio >= 1 AND mes_inicio <= 12),
+    CHECK(mes_fin >= 1 AND mes_fin <= 12),
 );
