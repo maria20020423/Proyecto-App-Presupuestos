@@ -1,9 +1,15 @@
-## Instal:
+## Instalar:
 ```
-
 sudo apt install libwbclient-dev
-
 ```
+
+## Para la api
+```
+cd api
+npm i
+npm run dev
+```
+
 
 
 ### Commandos
@@ -21,7 +27,6 @@ SHOW DATABASE;
 ```
 ## Ejecucion de Scripts:
 -i singifica input file
-
 ```
 
 isql -u maria -p mariita /var/lib/firebird/data/mirror.fdb -i ./procedures/create_user.sql
