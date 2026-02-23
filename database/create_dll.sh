@@ -4,12 +4,10 @@ DIR_ORIGEN="$BASE_DIR/tablas"
 ARCHIVO_DESTINO="$BASE_DIR/DLL/crear_base_datos.sql"
 mkdir -p "$(dirname "$ARCHIVO_DESTINO")"
 
-# 4. Limpiar o crear el archivo de destino
 > "$ARCHIVO_DESTINO"
 
 if ls "$DIR_ORIGEN"/*.sql >/dev/null 2>&1; then
     cat "$DIR_ORIGEN"/*.sql > "$ARCHIVO_DESTINO"
-    echo "¡Éxito!"
     echo "Origen: $DIR_ORIGEN"
     echo "Destino: $ARCHIVO_DESTINO"
 else

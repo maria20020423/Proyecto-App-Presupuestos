@@ -38,13 +38,13 @@ RECREATE TABLE PRESUPUESTO (
     mes_inicio INTEGER NOT NULL,
     anio_fin INTEGER NOT NULL,
     mes_fin INTEGER NOT NULL,
-    total_ingresos_planificados NUMERIC(15, 2) NOT NULL DEFAULT 0,
-    total_gastos_planificados NUMERIC(15, 2) NOT NULL DEFAULT 0,
-    total_ahorro_planificado NUMERIC(15, 2) NOT NULL DEFAULT 0,
+    total_ingresos_planificados NUMERIC(15, 2) DEFAULT 0 NOT NULL,
+    total_gastos_planificados NUMERIC(15, 2) DEFAULT 0 NOT NULL,
+    total_ahorro_planificado NUMERIC(15, 2) DEFAULT 0 NOT NULL,
     fecha_creacion TIMESTAMP
     WITH
         TIME ZONE NOT NULL,
-        estado VARCHAR(20) NOT NULL DEFAULT 'borrador',
+        estado VARCHAR(20) DEFAULT 'borrador' NOT NULL,
         creado_en TIMESTAMP
     WITH
         TIME ZONE NOT NULL,
