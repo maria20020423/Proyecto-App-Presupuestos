@@ -1,0 +1,10 @@
+DROP PROCEDURE SP_ELIMINAR_CATEGORIA IF EXISTS;
+
+CREATE PROCEDURE SP_ELIMINAR_CATEGORIA (
+    p_id_categoria INTEGER
+) AS
+BEGIN
+    UPDATE CATEGORIA
+    SET estado = 'inactivo'
+    WHERE id_categoria = :p_id_categoria;
+END;
