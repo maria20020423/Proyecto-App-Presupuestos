@@ -1,0 +1,10 @@
+DROP PROCEDURE SP_ELIMINAR_USUARIO IF EXISTS;
+
+CREATE PROCEDURE SP_ELIMINAR_USUARIO (
+    p_id_usuario INTEGER
+) AS
+BEGIN
+    UPDATE USUARIO
+    SET estado = 'inactivo'
+    WHERE id_usuario = :p_id_usuario;
+END;
