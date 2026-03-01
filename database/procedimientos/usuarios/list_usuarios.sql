@@ -1,6 +1,4 @@
-DROP PROCEDURE SP_LISTAR_USUARIOS IF EXISTS;
-
-CREATE PROCEDURE SP_LISTAR_USUARIOS ()
+RECREATE PROCEDURE SP_LISTAR_USUARIOS
 RETURNS (
     id_usuario INTEGER,
     nombre VARCHAR(255),
@@ -15,4 +13,4 @@ BEGIN
         INTO :id_usuario, :nombre, :apellido, :correo_electronico, :salario_mensual_base, :estado
     DO
         SUSPEND;
-END;
+END

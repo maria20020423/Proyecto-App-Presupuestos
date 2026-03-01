@@ -1,6 +1,4 @@
-DROP PROCEDURE SP_CONSULTAR_USUARIO IF EXISTS;
-
-CREATE PROCEDURE SP_CONSULTAR_USUARIO (
+RECREATE PROCEDURE SP_CONSULTAR_USUARIO (
     p_id_usuario INTEGER
 ) RETURNS (
     id_usuario INTEGER,
@@ -11,10 +9,11 @@ CREATE PROCEDURE SP_CONSULTAR_USUARIO (
     estado VARCHAR(20)
 ) AS
 BEGIN
-    FOR SELECT id_usuario, nombre, apellido, correo_electronico, salario_mensual_base, estado
-        FROM USUARIO
-        WHERE id_usuario = :p_id_usuario
-        INTO :id_usuario, :nombre, :apellido, :correo_electronico, :salario_mensual_base, :estado
-    DO
+    SELECT id_usuario, nombre, apellido, correo_electronico, salario_mensual_base, estado
+    FROM USUARIO
+    WHERE id_usuario = :p_id_usuario
+    INTO :id_usuario, :nombre, :apellido, :correo_electronico, :salario_mensual_base, :estado;
+    
+    IF (id_usuario IS NOT NULL) THEN
         SUSPEND;
-END;
+END

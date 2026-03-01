@@ -12,5 +12,6 @@ RECREATE TABLE TRANSACCIONES (
     no_factura VARCHAR(500),
     creado_en TIMESTAMP WITH TIME ZONE NOT NULL,
     modificado_en TIMESTAMP WITH TIME ZONE DEFAULT NULL,
-    creado_por INTEGER
+    creado_por INTEGER,
+    modificado_por INTEGER DEFAULT NULL
 );

@@ -1,22 +1,37 @@
-DROP PROCEDURE SP_INSERTAR_CATEGORIA IF EXISTS;
-
 CREATE PROCEDURE SP_INSERTAR_CATEGORIA (
-    p_nombre VARCHAR(255),
-    p_descripcion VARCHAR(255),
-    p_creado_por VARCHAR(255)
-) RETURNS (id_categoria INTEGER) AS
+    p_name VARCHAR(500),
+    p_descripcion VARCHAR(500),
+    p_tipo_categoria INTEGER,
+    p_category_icon VARCHAR(500),
+    p_color_format VARCHAR(500),
+    p_ui_order INTEGER,
+    p_creado_por INTEGER
+)
+RETURNS (
+    id_categoria INTEGER
+)
+AS
 BEGIN
     INSERT INTO CATEGORIA (
         nombre,
         descripcion,
-        creado_por,
-        estado
+        tipo_categoria,
+        category_icon,
+        color_format,
+        ui_order,
+        creado_en,
+        creado_por
     )
     VALUES (
-        :p_nombre,
+        :p_name,
         :p_descripcion,
-        :p_creado_por,
-        'activo'
+        :p_tipo_categoria,
+        :p_category_icon,
+        :p_color_format,
+        :p_ui_order,
+        CURRENT_TIMESTAMP,
+        :p_creado_por
     )
-    RETURNING id_categoria INTO :id_categoria;
+    RETURNING id INTO :id_categoria;
+    SUSPEND;
 END;

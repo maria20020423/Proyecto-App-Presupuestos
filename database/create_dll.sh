@@ -13,3 +13,4 @@ if ls "$DIR_ORIGEN"/*.sql >/dev/null 2>&1; then
 else
     echo "Error: No se encontraron archivos .sql en '$DIR_ORIGEN'."
 fi
+

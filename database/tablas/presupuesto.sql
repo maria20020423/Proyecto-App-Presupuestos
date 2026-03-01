@@ -14,6 +14,7 @@ RECREATE TABLE PRESUPUESTO (
     creado_en TIMESTAMP WITH TIME ZONE NOT NULL,
     modificado_en TIMESTAMP WITH TIME ZONE DEFAULT NULL,
     creado_por INTEGER,
+    modificado_por INTEGER DEFAULT NULL,
     CHECK(mes_inicio >= 1 AND mes_inicio <= 12),
-    CHECK(mes_fin >= 1 AND mes_fin <= 12),
+    CHECK(mes_fin >= 1 AND mes_fin <= 12)
 );
