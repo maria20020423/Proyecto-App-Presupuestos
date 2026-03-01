@@ -1,4 +1,4 @@
-CREATE OR ALTER PROCEDURE SP_LISTAR_PRESUPUESTOS ()
+CREATE OR ALTER PROCEDURE SP_LISTAR_PRESUPUESTOS (p_id_usuario INTEGER, p_estado VARCHAR(20))
 RETURNS (
     id_presupuesto INTEGER,
     id_usuario INTEGER,
@@ -24,7 +24,7 @@ BEGIN
         total_ingresos_planificados, total_gastos_planificados, total_ahorro_planificado,
         fecha_creacion, estado, creado_en, modificado_en, creado_por, modificado_por
     FROM PRESUPUESTO
-    WHERE id_presupuesto = :id_presupuesto
+    WHERE id_usuario = :p_id_usuario AND estado = :p_estado
     INTO 
         :id_presupuesto, :id_usuario, :nombre_presupuesto, :anio_inicio, :mes_inicio, :anio_fin, :mes_fin,
         :total_ingresos_planificados, :total_gastos_planificados, :total_ahorro_planificado,

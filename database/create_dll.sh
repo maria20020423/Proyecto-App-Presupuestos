@@ -7,7 +7,10 @@ mkdir -p "$(dirname "$ARCHIVO_DESTINO")"
 > "$ARCHIVO_DESTINO"
 
 if ls "$DIR_ORIGEN"/*.sql >/dev/null 2>&1; then
-    cat "$DIR_ORIGEN"/*.sql > "$ARCHIVO_DESTINO"
+    for file in "$DIR_ORIGEN"/*.sql; do
+        cat "$file" >> "$ARCHIVO_DESTINO"
+        echo -e "\n" >> "$ARCHIVO_DESTINO"
+    done
     echo "Origen: $DIR_ORIGEN"
     echo "Destino: $ARCHIVO_DESTINO"
 else

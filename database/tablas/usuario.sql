@@ -5,6 +5,8 @@ RECREATE TABLE USUARIO (
     correo_electronico VARCHAR(255) NOT NULL,
     creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
     modificado_en TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+    creador_por INTEGER DEFAULT NULL,
+    modificado_por INTEGER DEFAULT NULL,
     salario_mensual_base NUMERIC(15,2) DEFAULT 0 NOT NULL,
     estado VARCHAR(20) DEFAULT 'activo' NOT NULL,
     CHECK (estado IN ('activo', 'inactivo')),
