@@ -1,0 +1,8 @@
+CREATE OR ALTER PROCEDURE SP_ELIMINAR_PRESUPUESTO (
+    id_presupuesto INTEGER
+)
+AS
+BEGIN
+    DELETE FROM PRESUPUESTO
+    WHERE id_presupuesto = :id_presupuesto;
+END
