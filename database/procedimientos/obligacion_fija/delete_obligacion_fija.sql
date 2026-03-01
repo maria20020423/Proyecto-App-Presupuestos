@@ -1,5 +1,3 @@
--- SP_ELIMINAR_OBLIGACION_FIJA
--- Realiza un soft delete actualizando el campo estado a 'inactivo' en la tabla OBLIGACION_FIJA.
 RECREATE PROCEDURE SP_ELIMINAR_OBLIGACION_FIJA (
     p_id_obligacion_fija INTEGER
 )

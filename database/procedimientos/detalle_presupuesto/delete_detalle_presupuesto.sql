@@ -1,5 +1,4 @@
--- SP_ELIMINAR_DETALLE_PRESUPUESTO
--- Realiza un soft delete actualizando el campo estado a 'inactivo' en la tabla DETALLE_PRESUPUESTO.
+
 RECREATE PROCEDURE SP_ELIMINAR_DETALLE_PRESUPUESTO (
     p_id_detalle_presupuesto INTEGER
 )

@@ -1,5 +1,4 @@
--- SP_ACTUALIZAR_DETALLE_PRESUPUESTO
--- Actualiza un registro existente en la tabla DETALLE_PRESUPUESTO.
+
 RECREATE PROCEDURE SP_ACTUALIZAR_DETALLE_PRESUPUESTO (
     p_id_detalle_presupuesto INTEGER,
     p_presupuesto_id INTEGER,

@@ -1,5 +1,4 @@
--- SP_CONSULTAR_DETALLE_PRESUPUESTO
--- Devuelve un único registro de la tabla DETALLE_PRESUPUESTO según su id.
+
 RECREATE PROCEDURE SP_CONSULTAR_DETALLE_PRESUPUESTO (
     p_id_detalle_presupuesto INTEGER
 )

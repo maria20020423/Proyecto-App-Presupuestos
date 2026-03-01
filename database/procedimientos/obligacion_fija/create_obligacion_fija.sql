@@ -1,5 +1,4 @@
--- SP_INSERTAR_OBLIGACION_FIJA
--- Inserta un nuevo registro en la tabla OBLIGACION_FIJA y retorna el id generado.
+
 RECREATE PROCEDURE SP_INSERTAR_OBLIGACION_FIJA (
     p_id_usuario INTEGER,
     p_subcategoria_id INTEGER,

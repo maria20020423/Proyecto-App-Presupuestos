@@ -1,17 +1,20 @@
-
-RECREATE PROCEDURE SP_CONSULTAR_OBLIGACION_FIJA (
-    p_id_obligacion_fija INTEGER
+-- SP_CONSULTAR_TRANSACCIONES
+-- Devuelve un único registro de la tabla TRANSACCIONES según su id.
+RECREATE PROCEDURE SP_CONSULTAR_TRANSACCIONES (
+    p_id_transacciones INTEGER
 )
 RETURNS (
     id INTEGER,
     id_usuario INTEGER,
+    presupuesto_id INTEGER,
+    anio INTEGER,
+    mes INTEGER,
     subcategoria_id INTEGER,
-    nombre VARCHAR(500),
+    obligacion_id INTEGER,
     descripcion VARCHAR(500),
-    dia_mes_expiracion INTEGER,
-    is_vigente BOOLEAN,
-    fecha_inicio DATE,
-    fecha_final DATE,
+    monto NUMERIC(15,2),
+    fecha DATE,
+    no_factura VARCHAR(500),
     creado_en TIMESTAMP WITH TIME ZONE,
     modificado_en TIMESTAMP WITH TIME ZONE,
     creado_por INTEGER,
@@ -22,29 +25,33 @@ BEGIN
     SELECT 
         id,
         id_usuario,
+        presupuesto_id,
+        anio,
+        mes,
         subcategoria_id,
-        nombre,
+        obligacion_id,
         descripcion,
-        dia_mes_expiracion,
-        is_vigente,
-        fecha_inicio,
-        fecha_final,
+        monto,
+        fecha,
+        no_factura,
         creado_en,
         modificado_en,
         creado_por,
         modificado_por
-    FROM OBLIGACION_FIJA
-    WHERE id = :p_id_obligacion_fija
+    FROM TRANSACCIONES
+    WHERE id = :p_id_transacciones
     INTO 
         :id,
         :id_usuario,
+        :presupuesto_id,
+        :anio,
+        :mes,
         :subcategoria_id,
-        :nombre,
+        :obligacion_id,
         :descripcion,
-        :dia_mes_expiracion,
-        :is_vigente,
-        :fecha_inicio,
-        :fecha_final,
+        :monto,
+        :fecha,
+        :no_factura,
         :creado_en,
         :modificado_en,
         :creado_por,

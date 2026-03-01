@@ -1,5 +1,3 @@
--- SP_ACTUALIZAR_OBLIGACION_FIJA
--- Actualiza un registro existente en la tabla OBLIGACION_FIJA.
 RECREATE PROCEDURE SP_ACTUALIZAR_OBLIGACION_FIJA (
     p_id_obligacion_fija INTEGER,
     p_id_usuario INTEGER,

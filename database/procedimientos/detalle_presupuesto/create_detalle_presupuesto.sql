@@ -1,5 +1,4 @@
--- SP_INSERTAR_DETALLE_PRESUPUESTO
--- Inserta un nuevo registro en la tabla DETALLE_PRESUPUESTO y retorna el id generado.
+--
 RECREATE PROCEDURE SP_INSERTAR_DETALLE_PRESUPUESTO (
     p_presupuesto_id INTEGER,
     p_subcategoria_id INTEGER,
