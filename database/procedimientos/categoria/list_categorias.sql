@@ -7,8 +7,8 @@ RETURNS (
     category_icon VARCHAR(500),
     color_format VARCHAR(500),
     ui_order INTEGER,
-    creado_en TIMESTAMP WITH TIME ZONE,
-    modificado_en TIMESTAMP WITH TIME ZONE,
+    creado_en TIMESTAMP,
+    modificado_en TIMESTAMP,
     creado_por INTEGER
 )
 AS

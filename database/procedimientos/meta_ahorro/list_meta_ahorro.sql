@@ -14,8 +14,8 @@ RETURNS (
     promedio_ahorro_mensual NUMERIC(15,2),
     fecha_inicio DATE,
     fecha_completada DATE,
-    creado_en TIMESTAMP WITH TIME ZONE,
-    modificado_en TIMESTAMP WITH TIME ZONE,
+    creado_en TIMESTAMP,
+    modificado_en TIMESTAMP,
     creado_por INTEGER,
     modificado_por INTEGER
 )

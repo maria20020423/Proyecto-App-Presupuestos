@@ -8,8 +8,8 @@ RETURNS (
     subcategoria_id INTEGER,
     observaciones VARCHAR(500),
     monto_mensual NUMERIC(15,2),
-    modificado_en TIMESTAMP WITH TIME ZONE,
-    creado_en TIMESTAMP WITH TIME ZONE,
+    modificado_en TIMESTAMP,
+    creado_en TIMESTAMP,
     creado_por INTEGER,
     modificado_por INTEGER
 )

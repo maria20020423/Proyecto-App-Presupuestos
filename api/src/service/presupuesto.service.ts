@@ -14,13 +14,13 @@ export default class PresupuestoService {
         this.firebird_client = firebird_client;
     }
 
-    public async getPresupuestos(id_usuario: number, estado: string): Promise<GetPresupuestoResult[]> {
+    public async getPresupuestos(id_usuario: number, estado: string): Promise<any> {
         const transaction = await this.firebird_client.startTransaction();
 
 
         try {
-            const resultSet = await this.firebird_client.executeQuery(transaction, "EXECUTE PROCEDURE SP_LISTAR_PRESUPUESTOS (?, ?)", [id_usuario, estado]);
-            const rows = await resultSet.fetchAsObject<GetPresupuestoResult>();
+            const resultSet = await this.firebird_client.executeQuery(transaction, "SELECT * FROM SP_LISTAR_PRESUPUESTOS(?, ?);", [id_usuario, estado]);
+            const rows = await resultSet.fetch();
             await resultSet.close();
             await transaction.commit();
             return rows;
@@ -73,9 +73,9 @@ export default class PresupuestoService {
         ?, 
         ?, 
         ?,  
-        CAST(CAST(? AS VARCHAR(100)) AS TIMESTAMP WITH TIME ZONE), -- fecha_creacion
+        CAST(CAST(? AS VARCHAR(100)) AS TIMESTAMP), -- fecha_creacion
         ?, 
-        CAST(CAST(? AS VARCHAR(100)) AS TIMESTAMP WITH TIME ZONE), -- creado_en
+        CAST(CAST(? AS VARCHAR(100)) AS TIMESTAMP), -- creado_en
         ?                  -- creado_por
     )`,
                 parameters // Keep using the array of strings we prepared

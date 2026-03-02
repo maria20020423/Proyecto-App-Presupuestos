@@ -12,10 +12,10 @@ RETURNS (
     total_ingresos_planificados NUMERIC(15,2),
     total_gastos_planificados NUMERIC(15,2),
     total_ahorro_planificado NUMERIC(15,2),
-    fecha_creacion TIMESTAMP WITH TIME ZONE,
+    fecha_creacion TIMESTAMP,
     estado VARCHAR(20),
-    creado_en TIMESTAMP WITH TIME ZONE,
-    modificado_en TIMESTAMP WITH TIME ZONE,
+    creado_en TIMESTAMP,
+    modificado_en TIMESTAMP,
     creado_por INTEGER,
     modificado_por INTEGER
 )

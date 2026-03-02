@@ -11,8 +11,8 @@ RECEREATE TABLE META_AHORRO (
     promedio_ahorro_mensual NUMERIC(15,2), 
     fecha_inicio DATE  DEFAULT CURRENT_DATE NOT NULL,
     fecha_completada DATE,
-    creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  NOT NULL,
-    modificado_en TIMESTAMP WITH TIME ZONE DEFAULT NULL ,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+    modificado_en TIMESTAMP DEFAULT NULL ,
     creado_por INTEGER,
     modificado_por INTEGER DEFAULT NULL
 );

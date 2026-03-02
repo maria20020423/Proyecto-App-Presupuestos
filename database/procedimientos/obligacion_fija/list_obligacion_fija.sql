@@ -9,8 +9,8 @@ RETURNS (
     is_vigente BOOLEAN,
     fecha_inicio DATE,
     fecha_final DATE,
-    creado_en TIMESTAMP WITH TIME ZONE,
-    modificado_en TIMESTAMP WITH TIME ZONE,
+    creado_en TIMESTAMP,
+    modificado_en TIMESTAMP,
     creado_por INTEGER,
     modificado_por INTEGER
 )
