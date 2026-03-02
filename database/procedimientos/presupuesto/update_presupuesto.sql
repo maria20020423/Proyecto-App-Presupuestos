@@ -1,4 +1,4 @@
-CREATE OR ALTER PROCEDURE SP_ACTUALIZAR_PRESUPUESTO (
+RECREATE  PROCEDURE SP_ACTUALIZAR_PRESUPUESTO (
     id_presupuesto INTEGER,
     id_usuario INTEGER,
     nombre_presupuesto VARCHAR(255),
@@ -9,11 +9,8 @@ CREATE OR ALTER PROCEDURE SP_ACTUALIZAR_PRESUPUESTO (
     total_ingresos_planificados NUMERIC(15,2),
     total_gastos_planificados NUMERIC(15,2),
     total_ahorro_planificado NUMERIC(15,2),
-    fecha_creacion TIMESTAMP,
     estado VARCHAR(20),
-    creado_en TIMESTAMP,
     modificado_en TIMESTAMP,
-    creado_por INTEGER,
     modificado_por INTEGER
 )
 AS
@@ -29,11 +26,8 @@ BEGIN
         total_ingresos_planificados = :total_ingresos_planificados,
         total_gastos_planificados = :total_gastos_planificados,
         total_ahorro_planificado = :total_ahorro_planificado,
-        fecha_creacion = :fecha_creacion,
         estado = :estado,
-        creado_en = :creado_en,
         modificado_en = :modificado_en,
-        creado_por = :creado_por,
         modificado_por = :modificado_por
     WHERE id_presupuesto = :id_presupuesto;
 END

@@ -7,6 +7,7 @@ import UserService from './service/user.service.js';
 import userRouter from './routes/usuarios.js';
 import presupuestoRouter from './routes/presupuestos.js';
 import PresupuestoService from './service/presupuesto.service.js';
+import { lowercaseResponseMiddleware } from './middleware/lowercaseResponse.js';
 const app = express();
 const PORT = 3000;
 
@@ -21,7 +22,9 @@ const client=createNativeClient(getDefaultLibraryFilename());
   const options = {
     username: 'maria', // Default username
     password: 'mariita', // Default password
-    sessionTimeZone: 'UTC' // Set session time zone to UTC
+    sessionTimeZone: 'UTC', // Set session time zone to UT
+    lowerCaseKeys: true,
+    
   };
 
 const attachment =await client.connect("localhost/3050:/var/lib/firebird/data/mirror.fdb",options)
@@ -31,6 +34,7 @@ const presupuestoService = new PresupuestoService(attachment);
 
 
 app.use(cors(corsOptions));
+app.use(lowercaseResponseMiddleware);
 app.use('/usuarios', userRouter(userService));
 app.use('/presupuesto',presupuestoRouter(presupuestoService));
 
@@ -39,5 +43,5 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);
+  console.log(`[server]: Server is running at http://localhost:${PORT}`);
 });

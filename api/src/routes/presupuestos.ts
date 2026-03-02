@@ -47,6 +47,17 @@ export default (presupuestoService:PresupuestoService): Router => {
     }
   });
 
+  router.put('/:id_presupuesto', async (req, res) => {
+    const id_presupuesto = parseInt(req.params.id_presupuesto);
+    const presupuesto = req.body;
+    try {
+      await presupuestoService.updatePresupuesto(id_presupuesto, presupuesto);
+      return res.status(200).json({ message: "Presupuesto updated successfully" });
+    } catch (err) {
+      return res.status(500).json({ message: "Error updating presupuesto", error: err });
+    }
+  });
+
   return router;
 };
 
