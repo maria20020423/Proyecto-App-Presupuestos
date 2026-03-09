@@ -2,7 +2,7 @@
 FROM node:20-slim AS builder
 WORKDIR /app
 
-# Instalamos herramientas de compilación y python para módulos nativos
+# Herramientas para compilar módulos nativos
 RUN apt-get update && apt-get install -y \
     python3 \
     make \
@@ -18,8 +18,7 @@ RUN npm run build
 FROM node:20-slim
 WORKDIR /app
 
-# IMPORTANTE: Para node-firebird-driver-native necesitamos 
-# libfbclient2 Y herramientas de compilación para el rebuild de npm
+# 1. Instalamos la librería y herramientas necesarias
 RUN apt-get update && apt-get install -y \
     python3 \
     make \
@@ -27,12 +26,14 @@ RUN apt-get update && apt-get install -y \
     libfbclient2 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app/package*.json ./
+# 2. FIX CRUCIAL: Crear el enlace simbólico para libfbclient.so
+# Esto resuelve el error "Cannot load Firebird client library"
+RUN ln -s /usr/lib/x86_64-linux-gnu/libfbclient.so.2 /usr/lib/x86_64-linux-gnu/libfbclient.so
 
-# Ahora npm install --omit=dev funcionará porque tiene Python y G++
+COPY --from=builder /app/package*.json ./
 RUN npm install --omit=dev
 
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 3000
-CMD ["node", "dist/index.js"]   
+CMD ["node", "dist/index.js"]
