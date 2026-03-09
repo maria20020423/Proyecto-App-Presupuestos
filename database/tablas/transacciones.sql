@@ -14,4 +14,4 @@ RECREATE TABLE TRANSACCIONES (
     modificado_en TIMESTAMP DEFAULT NULL,
     creado_por INTEGER,
     modificado_por INTEGER DEFAULT NULL
-);
+)#

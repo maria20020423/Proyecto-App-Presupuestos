@@ -8,4 +8,4 @@ RECREATE TABLE SUBCATEGORIA (
     modificado_en TIMESTAMP DEFAULT NULL,
     creado_por INTEGER,
     modificado_por INTEGER DEFAULT NULL
-);
+)#

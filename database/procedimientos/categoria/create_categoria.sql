@@ -32,6 +32,6 @@ BEGIN
         CURRENT_TIMESTAMP,
         :p_creado_por
     )
-    RETURNING id INTO :id_categoria;
+    RETURNING id INTO id_categoria;
     SUSPEND;
-END;
+END#

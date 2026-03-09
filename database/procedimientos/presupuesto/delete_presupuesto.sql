@@ -5,4 +5,4 @@ AS
 BEGIN
     DELETE FROM PRESUPUESTO
     WHERE id_presupuesto = :id_presupuesto;
-END
+END#

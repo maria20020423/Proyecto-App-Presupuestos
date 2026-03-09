@@ -9,4 +9,4 @@ BEGIN
     SET estado = 'inactivo',
         modificado_en = CURRENT_TIMESTAMP
     WHERE id = :p_id_meta_ahorro;
-END
+END#

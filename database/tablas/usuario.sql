@@ -11,4 +11,4 @@ RECREATE TABLE USUARIO (
     estado VARCHAR(20) DEFAULT 'activo' NOT NULL,
     CHECK (estado IN ('activo', 'inactivo')),
     CHECK (salario_mensual_base >= 0)
-);
+)#

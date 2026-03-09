@@ -1,5 +1,6 @@
 
-RECREATE PROCEDURE SP_LISTAR_DETALLE_PRESUPUESTO
+CREATE PROCEDURE SP_LISTAR_DETALLE_PRESUPUESTO (p_id_presupuesto INTEGER)
+
 RETURNS (
     id INTEGER,
     presupuesto_id INTEGER,
@@ -22,6 +23,7 @@ BEGIN
         creado_en,
         creado_por
     FROM DETALLE_PRESUPUESTO
+    WHERE presupuesto_id=p_id_presupuesto
     INTO 
         :id,
         :presupuesto_id,
@@ -33,4 +35,4 @@ BEGIN
         :creado_por
     DO
         SUSPEND;
-END
+END#

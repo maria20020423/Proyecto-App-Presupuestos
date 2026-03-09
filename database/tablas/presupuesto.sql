@@ -17,4 +17,4 @@ RECREATE TABLE PRESUPUESTO (
     modificado_por INTEGER DEFAULT NULL,
     CHECK(mes_inicio >= 1 AND mes_inicio <= 12),
     CHECK(mes_fin >= 1 AND mes_fin <= 12)
-);
+)#

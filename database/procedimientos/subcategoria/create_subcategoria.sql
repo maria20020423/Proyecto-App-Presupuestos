@@ -30,4 +30,4 @@ BEGIN
     )
     RETURNING id INTO id_subcategoria;
     SUSPEND;
-END
+END#

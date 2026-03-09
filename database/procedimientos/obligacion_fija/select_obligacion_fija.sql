@@ -51,4 +51,4 @@ BEGIN
         :modificado_por;
     IF (id IS NOT NULL) THEN
         SUSPEND;
-END
+END#

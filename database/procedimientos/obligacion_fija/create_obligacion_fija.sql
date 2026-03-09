@@ -41,4 +41,4 @@ BEGIN
     )
     RETURNING id INTO id_obligacion_fija;
     SUSPEND;
-END
+END#

@@ -754,7 +754,7 @@ proyecto-presupuesto-personal/
 ### 8.4 Fase 3: Implementación de la Aplicación (Semanas 7-8)
 
 **Entregables:**
-1. Front End, Backend
+1. Front END#, Backend
 
 **Fecha de entrega:** Fin de Semana 8
 ---

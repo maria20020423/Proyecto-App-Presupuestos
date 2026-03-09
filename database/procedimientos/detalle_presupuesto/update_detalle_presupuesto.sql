@@ -17,4 +17,4 @@ BEGIN
         creado_por = :p_creado_por,
         modificado_en = CURRENT_TIMESTAMP
     WHERE id = :p_id_detalle_presupuesto;
-END
+END#

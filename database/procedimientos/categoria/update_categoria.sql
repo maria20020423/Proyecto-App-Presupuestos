@@ -13,4 +13,4 @@ BEGIN
         modificado_por = :p_modificado_por,
         modificado_en= CURRENT_TIMESTAMP
     WHERE id= :p_id_categoria;
-END;
+END#

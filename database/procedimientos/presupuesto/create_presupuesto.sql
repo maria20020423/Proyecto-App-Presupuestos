@@ -25,4 +25,4 @@ BEGIN
         :total_ingresos_planificados, :total_gastos_planificados, :total_ahorro_planificado,
         :fecha_creacion, :estado, :creado_en, :creado_por
     );
-END
+END#

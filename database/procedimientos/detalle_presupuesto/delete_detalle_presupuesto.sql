@@ -8,4 +8,4 @@ BEGIN
     SET estado = 'inactivo',
         modificado_en = CURRENT_TIMESTAMP
     WHERE id = :p_id_detalle_presupuesto;
-END
+END#

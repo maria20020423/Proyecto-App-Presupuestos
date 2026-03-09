@@ -51,4 +51,4 @@ BEGIN
     )
     RETURNING id INTO id_meta_ahorro;
     SUSPEND;
-END
+END#

@@ -5,5 +5,5 @@ AS
 BEGIN
     DELETE FROM CATEGORIA
     WHERE id = :p_id_categoria;
-END;
+END#
 

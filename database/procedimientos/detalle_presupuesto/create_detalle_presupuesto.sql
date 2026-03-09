@@ -29,4 +29,4 @@ BEGIN
     )
     RETURNING id INTO id_detalle_presupuesto;
     SUSPEND;
-END
+END#
