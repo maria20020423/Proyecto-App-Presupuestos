@@ -1,7 +1,16 @@
+
+
+## Ahora tenemos Docker Container
+```
+docker compose -up --build
+```
+
 ## Instalar:
 ```
 sudo apt install libwbclient-dev
 ```
+
+
 
 ## Para la api
 ```
