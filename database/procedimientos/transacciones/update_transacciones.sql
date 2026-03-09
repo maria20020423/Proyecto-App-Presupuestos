@@ -1,6 +1,6 @@
 -- SP_ACTUALIZAR_TRANSACCIONES
 -- Actualiza un registro existente en la tabla TRANSACCIONES.
-RECREATE PROCEDURE SP_ACTUALIZAR_TRANSACCIONES (
+CREATE PROCEDURE SP_ACTUALIZAR_TRANSACCIONES (
     p_id_transacciones INTEGER,
     p_id_usuario INTEGER,
     p_presupuesto_id INTEGER,

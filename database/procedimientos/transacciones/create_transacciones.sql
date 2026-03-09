@@ -1,6 +1,6 @@
 -- SP_INSERTAR_TRANSACCIONES
 -- Inserta un nuevo registro en la tabla TRANSACCIONES y retorna el id generado.
-RECREATE PROCEDURE SP_INSERTAR_TRANSACCIONES (
+CREATE PROCEDURE SP_INSERTAR_TRANSACCIONES (
     p_id_usuario INTEGER,
     p_presupuesto_id INTEGER,
     p_anio INTEGER,

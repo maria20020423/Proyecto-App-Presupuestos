@@ -1,6 +1,6 @@
 -- SP_CONSULTAR_META_AHORRO
 -- Devuelve un único registro de la tabla META_AHORRO según su id.
-RECREATE PROCEDURE SP_CONSULTAR_META_AHORRO (
+CREATE PROCEDURE SP_CONSULTAR_META_AHORRO (
     p_id_meta_ahorro INTEGER
 )
 RETURNS (
