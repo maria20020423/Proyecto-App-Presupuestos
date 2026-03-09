@@ -25,4 +25,4 @@ BEGIN
     )
     RETURNING id_usuario INTO id_usuario;
     SUSPEND;
-END
+END#

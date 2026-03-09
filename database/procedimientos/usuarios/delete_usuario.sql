@@ -6,4 +6,4 @@ BEGIN
     SET estado = 'inactivo',
         modificado_en = CURRENT_TIMESTAMP
     WHERE id_usuario = :p_id_usuario;
-END
+END#
