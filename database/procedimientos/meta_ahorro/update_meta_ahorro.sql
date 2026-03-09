@@ -1,6 +1,6 @@
 -- SP_ACTUALIZAR_META_AHORRO
 -- Actualiza un registro existente en la tabla META_AHORRO.
-RECREATE PROCEDURE SP_ACTUALIZAR_META_AHORRO (
+CREATE PROCEDURE SP_ACTUALIZAR_META_AHORRO (
     p_id_meta_ahorro INTEGER,
     p_id_usuario INTEGER,
     p_nombre VARCHAR(255),

@@ -1,6 +1,6 @@
 -- SP_INSERTAR_META_AHORRO
 -- Inserta un nuevo registro en la tabla META_AHORRO y retorna el id generado.
-RECREATE PROCEDURE SP_INSERTAR_META_AHORRO (
+CREATE PROCEDURE SP_INSERTAR_META_AHORRO (
     p_id_usuario INTEGER,
     p_nombre VARCHAR(255),
     p_descripcion VARCHAR(500),

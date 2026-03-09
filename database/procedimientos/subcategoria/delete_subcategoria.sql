@@ -1,6 +1,6 @@
 -- SP_ELIMINAR_SUBCATEGORIA
 -- Realiza un soft delete actualizando el campo estado a 'inactivo' en la tabla SUBCATEGORIA.
-RECREATE PROCEDURE SP_ELIMINAR_SUBCATEGORIA (
+CREATE PROCEDURE SP_ELIMINAR_SUBCATEGORIA (
     p_id_subcategoria INTEGER
 )
 AS

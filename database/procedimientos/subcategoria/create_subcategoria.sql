@@ -1,6 +1,6 @@
 -- SP_INSERTAR_SUBCATEGORIA
 -- Inserta un nuevo registro en la tabla SUBCATEGORIA y retorna el id generado.
-RECREATE PROCEDURE SP_INSERTAR_SUBCATEGORIA (
+CREATE PROCEDURE SP_INSERTAR_SUBCATEGORIA (
     p_categoria_id INTEGER,
     p_nombre VARCHAR(500),
     p_descripcion VARCHAR(500),

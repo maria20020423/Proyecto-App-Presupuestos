@@ -1,6 +1,6 @@
 -- SP_ACTUALIZAR_SUBCATEGORIA
 -- Actualiza un registro existente en la tabla SUBCATEGORIA.
-RECREATE PROCEDURE SP_ACTUALIZAR_SUBCATEGORIA (
+CREATE PROCEDURE SP_ACTUALIZAR_SUBCATEGORIA (
     p_id_subcategoria INTEGER,
     p_categoria_id INTEGER,
     p_nombre VARCHAR(500),
