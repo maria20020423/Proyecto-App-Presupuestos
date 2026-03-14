@@ -1,10 +1,11 @@
 
 import { response, type Request, type RequestHandler, type Response } from "express";
 import type { Attachment } from 'node-firebird-driver-native'
+import type { GetUsuarioResult } from "../types/dto/usuario/get_usuario_result.js";
 
 export default class UserService {
     private firebird_client: Attachment;
-
+    ////
 
     constructor(firebird_client: Attachment) {
         this.firebird_client = firebird_client;
@@ -18,7 +19,7 @@ export default class UserService {
                 query
             );
 
-            const rows = await resultSet.fetch();
+            const rows = await resultSet.fetchAsObject<GetUsuarioResult>();
             await resultSet.close();
             await transaction.commit();
 
@@ -43,7 +44,8 @@ export default class UserService {
                 query,
                 [id_usuario]
             );
-            const rows = await resultSet.fetch();
+   
+            const rows = await resultSet.fetchAsObject<GetUsuarioResult>();
             await resultSet.close();
             await transaction.commit();
             return res.json({ message: "getUser", results: rows });
