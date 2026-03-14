@@ -293,10 +293,10 @@ END#
 
 --
 CREATE PROCEDURE SP_INSERTAR_DETALLE_PRESUPUESTO (
-    p_presupuesto_id INTEGER,
-    p_subcategoria_id INTEGER,
+    p_id_presupuesto INTEGER,
+    p_id_subcategoria INTEGER,
+    p_monto_mensual NUMERIC(15, 2),
     p_observaciones VARCHAR(500),
-    p_monto_mensual NUMERIC(15,2),
     p_creado_por INTEGER
 )
 RETURNS (
@@ -307,49 +307,57 @@ BEGIN
     INSERT INTO DETALLE_PRESUPUESTO (
         presupuesto_id,
         subcategoria_id,
-        observaciones,
         monto_mensual,
+        observaciones,
+        estado,
         creado_en,
         creado_por
     )
     VALUES (
-        :p_presupuesto_id,
-        :p_subcategoria_id,
-        :p_observaciones,
+        :p_id_presupuesto,
+        :p_id_subcategoria,
         :p_monto_mensual,
+        :p_observaciones,
+        'activo',
         CURRENT_TIMESTAMP,
         :p_creado_por
     )
     RETURNING id INTO id_detalle_presupuesto;
+
     SUSPEND;
 END#
 
 
 
 CREATE PROCEDURE SP_ELIMINAR_DETALLE_PRESUPUESTO (
-    p_id_detalle_presupuesto INTEGER
+    p_id_detalle_presupuesto INTEGER,
+    p_modificado_por INTEGER
 )
 AS
 BEGIN
     UPDATE DETALLE_PRESUPUESTO
     SET estado = 'inactivo',
-        modificado_en = CURRENT_TIMESTAMP
+        modificado_en = CURRENT_TIMESTAMP,
+        modificado_por = :p_modificado_por
     WHERE id = :p_id_detalle_presupuesto;
 END#
 
 
 
-CREATE PROCEDURE SP_LISTAR_DETALLE_PRESUPUESTO (p_id_presupuesto INTEGER)
-
+CREATE PROCEDURE SP_LISTAR_DETALLE_PRESUPUESTO (
+    p_id_presupuesto INTEGER
+)
 RETURNS (
     id INTEGER,
     presupuesto_id INTEGER,
     subcategoria_id INTEGER,
+    monto_mensual NUMERIC(15, 2),
     observaciones VARCHAR(500),
-    monto_mensual NUMERIC(15,2),
-    modificado_en TIMESTAMP,
+    estado VARCHAR(20),
     creado_en TIMESTAMP,
-    creado_por INTEGER
+    modificado_en TIMESTAMP,
+    creado_por INTEGER,
+    modificado_por INTEGER
 )
 AS
 BEGIN
@@ -357,22 +365,26 @@ BEGIN
         id,
         presupuesto_id,
         subcategoria_id,
-        observaciones,
         monto_mensual,
-        modificado_en,
+        observaciones,
+        estado,
         creado_en,
-        creado_por
+        modificado_en,
+        creado_por,
+        modificado_por
     FROM DETALLE_PRESUPUESTO
-    WHERE presupuesto_id=p_id_presupuesto
+    WHERE presupuesto_id = :p_id_presupuesto
     INTO 
         :id,
         :presupuesto_id,
         :subcategoria_id,
-        :observaciones,
         :monto_mensual,
-        :modificado_en,
+        :observaciones,
+        :estado,
         :creado_en,
-        :creado_por
+        :modificado_en,
+        :creado_por,
+        :modificado_por
     DO
         SUSPEND;
 END#
@@ -386,23 +398,25 @@ RETURNS (
     id INTEGER,
     presupuesto_id INTEGER,
     subcategoria_id INTEGER,
+    monto_mensual NUMERIC(15, 2),
     observaciones VARCHAR(500),
-    monto_mensual NUMERIC(15,2),
-    modificado_en TIMESTAMP,
+    estado VARCHAR(20),
     creado_en TIMESTAMP,
+    modificado_en TIMESTAMP,
     creado_por INTEGER,
     modificado_por INTEGER
 )
 AS
 BEGIN
-    SELECT 
+    FOR SELECT 
         id,
         presupuesto_id,
         subcategoria_id,
-        observaciones,
         monto_mensual,
-        modificado_en,
+        observaciones,
+        estado,
         creado_en,
+        modificado_en,
         creado_por,
         modificado_por
     FROM DETALLE_PRESUPUESTO
@@ -411,14 +425,14 @@ BEGIN
         :id,
         :presupuesto_id,
         :subcategoria_id,
-        :observaciones,
         :monto_mensual,
-        :modificado_en,
+        :observaciones,
+        :estado,
         :creado_en,
+        :modificado_en,
         :creado_por,
-        :modificado_por;
-
-    IF (id IS NOT NULL) THEN
+        :modificado_por
+    DO
         SUSPEND;
 END#
 
@@ -426,21 +440,17 @@ END#
 
 CREATE PROCEDURE SP_ACTUALIZAR_DETALLE_PRESUPUESTO (
     p_id_detalle_presupuesto INTEGER,
-    p_presupuesto_id INTEGER,
-    p_subcategoria_id INTEGER,
+    p_monto_mensual NUMERIC(15, 2),
     p_observaciones VARCHAR(500),
-    p_monto_mensual NUMERIC(15,2),
-    p_creado_por INTEGER
+    p_modificado_por INTEGER
 )
 AS
 BEGIN
     UPDATE DETALLE_PRESUPUESTO
-    SET presupuesto_id = :p_presupuesto_id,
-        subcategoria_id = :p_subcategoria_id,
+    SET monto_mensual = :p_monto_mensual,
         observaciones = :p_observaciones,
-        monto_mensual = :p_monto_mensual,
-        creado_por = :p_creado_por,
-        modificado_en = CURRENT_TIMESTAMP
+        modificado_en = CURRENT_TIMESTAMP,
+        modificado_por = :p_modificado_por
     WHERE id = :p_id_detalle_presupuesto;
 END#
 
