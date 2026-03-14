@@ -1,4 +1,3 @@
---
 CREATE PROCEDURE SP_INSERTAR_DETALLE_PRESUPUESTO (
     p_presupuesto_id INTEGER,
     p_subcategoria_id INTEGER,
