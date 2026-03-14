@@ -6,7 +6,7 @@ CREATE TABLE META_AHORRO (
     monto_objetivo NUMERIC(15,2) NOT NULL CHECK (monto_objetivo > 0),
     monto_acumulado NUMERIC(15,2)  DEFAULT 0 NOT NULL CHECK (monto_acumulado >= 0),
     fecha_objetivo DATE NOT NULL,
-    estado INTEGER NOT NULL,
+    estado VARCHAR(20) DEFAULT 'activo' NOT NULL,
     prioridad INTEGER DEFAULT 3  NOT NULL CHECK (prioridad BETWEEN 1 AND 5),
     promedio_ahorro_mensual NUMERIC(15,2), 
     fecha_inicio DATE  DEFAULT CURRENT_DATE NOT NULL,

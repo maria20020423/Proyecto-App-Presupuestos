@@ -1,3 +1,4 @@
+# /docker-compose.yaml
 services:
   firebird:
     image: firebirdsql/firebird
@@ -7,12 +8,19 @@ services:
       - FIREBIRD_USER=maria
       - FIREBIRD_PASSWORD=mariita
       - FIREBIRD_DATABASE=mirror.fdb
-      - FIREBIRD_DATABASE_DEFAULT_CHARSET=UTF8
     volumes:
       - ./data:/var/lib/firebird/data
       - ./scripts:/opt/firebird/db_scripts
-
-
     ports:
-    - 3050:3050
+      - "3050:3050"
 
+  api:
+    build: 
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - firebird
+    environment:
+      - NODE_ENV=production

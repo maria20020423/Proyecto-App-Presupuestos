@@ -13,4 +13,4 @@ BEGIN
         INTO :id_usuario, :nombre, :apellido, :correo_electronico, :salario_mensual_base, :estado
     DO
         SUSPEND;
-END
+END#

@@ -11,7 +11,7 @@ RETURNS (
     monto_objetivo NUMERIC(15,2),
     monto_acumulado NUMERIC(15,2),
     fecha_objetivo DATE,
-    estado INTEGER,
+    estado VARCHAR(20),
     prioridad INTEGER,
     promedio_ahorro_mensual NUMERIC(15,2),
     fecha_inicio DATE,

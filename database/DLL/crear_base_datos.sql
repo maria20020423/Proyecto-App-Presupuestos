@@ -35,7 +35,7 @@ CREATE TABLE META_AHORRO (
     monto_objetivo NUMERIC(15,2) NOT NULL CHECK (monto_objetivo > 0),
     monto_acumulado NUMERIC(15,2)  DEFAULT 0 NOT NULL CHECK (monto_acumulado >= 0),
     fecha_objetivo DATE NOT NULL,
-    estado INTEGER NOT NULL,
+    estado VARCHAR(20) DEFAULT 'activo' NOT NULL,
     prioridad INTEGER DEFAULT 3  NOT NULL CHECK (prioridad BETWEEN 1 AND 5),
     promedio_ahorro_mensual NUMERIC(15,2), 
     fecha_inicio DATE  DEFAULT CURRENT_DATE NOT NULL,
@@ -168,7 +168,7 @@ BEGIN
     SUSPEND;
 END#
 
-CREATE OR ALTER PROCEDURE SP_ELIMINAR_CATEGORIA (
+CREATE PROCEDURE SP_ELIMINAR_CATEGORIA (
     p_id_categoria INTEGER
 )
 AS
@@ -179,7 +179,7 @@ END#
 
 
 
-CREATE OR ALTER PROCEDURE SP_LISTAR_CATEGORIAS
+CREATE PROCEDURE SP_LISTAR_CATEGORIAS
 RETURNS (
     id INTEGER,
     nombre VARCHAR(500),
@@ -225,7 +225,7 @@ BEGIN
 END#
 
 
-CREATE OR ALTER PROCEDURE SP_CONSULTAR_CATEGORIA (
+CREATE PROCEDURE SP_CONSULTAR_CATEGORIA (
     p_id_categoria INTEGER
 )
 RETURNS (
@@ -454,7 +454,7 @@ CREATE PROCEDURE SP_INSERTAR_META_AHORRO (
     p_monto_objetivo NUMERIC(15,2),
     p_monto_acumulado NUMERIC(15,2),
     p_fecha_objetivo DATE,
-    p_estado INTEGER,
+    p_estado VARCHAR(20),
     p_prioridad INTEGER,
     p_promedio_ahorro_mensual NUMERIC(15,2),
     p_fecha_inicio DATE,
@@ -526,7 +526,7 @@ RETURNS (
     monto_objetivo NUMERIC(15,2),
     monto_acumulado NUMERIC(15,2),
     fecha_objetivo DATE,
-    estado INTEGER,
+    estado VARCHAR(20),
     prioridad INTEGER,
     promedio_ahorro_mensual NUMERIC(15,2),
     fecha_inicio DATE,
@@ -591,7 +591,7 @@ RETURNS (
     monto_objetivo NUMERIC(15,2),
     monto_acumulado NUMERIC(15,2),
     fecha_objetivo DATE,
-    estado INTEGER,
+    estado VARCHAR(20),
     prioridad INTEGER,
     promedio_ahorro_mensual NUMERIC(15,2),
     fecha_inicio DATE,
@@ -654,7 +654,7 @@ CREATE PROCEDURE SP_ACTUALIZAR_META_AHORRO (
     p_monto_objetivo NUMERIC(15,2),
     p_monto_acumulado NUMERIC(15,2),
     p_fecha_objetivo DATE,
-    p_estado INTEGER,
+    p_estado estado VARCHAR(20),
     p_prioridad INTEGER,
     p_promedio_ahorro_mensual NUMERIC(15,2),
     p_fecha_inicio DATE,
@@ -875,7 +875,7 @@ BEGIN
 END#
 
 
-CREATE OR ALTER PROCEDURE SP_INSERTAR_PRESUPUESTO (
+CREATE PROCEDURE SP_INSERTAR_PRESUPUESTO (
     id_usuario INTEGER,
     nombre_presupuesto VARCHAR(255),
     anio_inicio INTEGER,
@@ -905,7 +905,7 @@ BEGIN
 END#
 
 
-CREATE OR ALTER PROCEDURE SP_ELIMINAR_PRESUPUESTO (
+CREATE PROCEDURE SP_ELIMINAR_PRESUPUESTO (
     id_presupuesto INTEGER
 )
 AS
@@ -914,7 +914,7 @@ BEGIN
     WHERE id_presupuesto = :id_presupuesto;
 END#
 
-CREATE OR ALTER PROCEDURE SP_LISTAR_PRESUPUESTOS (p_id_usuario INTEGER, p_estado VARCHAR(20))
+CREATE PROCEDURE SP_LISTAR_PRESUPUESTOS (p_id_usuario INTEGER, p_estado VARCHAR(20))
 RETURNS (
     id_presupuesto INTEGER,
     id_usuario INTEGER,
@@ -952,7 +952,7 @@ BEGIN
 END#
 
 
-CREATE OR ALTER PROCEDURE SP_CONSULTAR_PRESUPUESTO (
+CREATE PROCEDURE SP_CONSULTAR_PRESUPUESTO (
     id_presupuesto INTEGER
 )
 RETURNS (
@@ -1437,7 +1437,7 @@ BEGIN
     )
     RETURNING id_usuario INTO id_usuario;
     SUSPEND;
-END
+END#
 
 CREATE PROCEDURE SP_ELIMINAR_USUARIO (
     p_id_usuario INTEGER
@@ -1447,7 +1447,7 @@ BEGIN
     SET estado = 'inactivo',
         modificado_en = CURRENT_TIMESTAMP
     WHERE id_usuario = :p_id_usuario;
-END
+END#
 
 CREATE PROCEDURE SP_LISTAR_USUARIOS
 RETURNS (
@@ -1464,7 +1464,7 @@ BEGIN
         INTO :id_usuario, :nombre, :apellido, :correo_electronico, :salario_mensual_base, :estado
     DO
         SUSPEND;
-END
+END#
 
 CREATE PROCEDURE SP_CONSULTAR_USUARIO (
     p_id_usuario INTEGER
@@ -1484,7 +1484,7 @@ BEGIN
     
     IF (id_usuario IS NOT NULL) THEN
         SUSPEND;
-END
+END#
 
 CREATE PROCEDURE SP_ACTUALIZAR_USUARIO (
     p_id_usuario INTEGER,
@@ -1499,6 +1499,6 @@ BEGIN
         salario_mensual_base = :p_salario_mensual,
         modificado_en = CURRENT_TIMESTAMP
     WHERE id_usuario = :p_id_usuario;
-END
+END#
 
 SET TERM ;#

@@ -7,7 +7,7 @@ CREATE PROCEDURE SP_INSERTAR_META_AHORRO (
     p_monto_objetivo NUMERIC(15,2),
     p_monto_acumulado NUMERIC(15,2),
     p_fecha_objetivo DATE,
-    p_estado INTEGER,
+    p_estado VARCHAR(20),
     p_prioridad INTEGER,
     p_promedio_ahorro_mensual NUMERIC(15,2),
     p_fecha_inicio DATE,

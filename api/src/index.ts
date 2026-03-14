@@ -27,7 +27,7 @@ const client=createNativeClient(getDefaultLibraryFilename());
     
   };
 
-const attachment =await client.connect("localhost/3050:/var/lib/firebird/data/mirror.fdb",options)
+const attachment =await client.connect("firebird/3050:/var/lib/firebird/data/mirror.fdb",options)
 
 const userService = new UserService(attachment);
 const presupuestoService = new PresupuestoService(attachment);

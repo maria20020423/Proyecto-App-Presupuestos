@@ -16,4 +16,4 @@ BEGIN
     
     IF (id_usuario IS NOT NULL) THEN
         SUSPEND;
-END
+END#
