@@ -1,3 +1,5 @@
+export type PresupuestoEstado = 'activo' | 'cerrado' | 'borrador';
+
 export interface Presupuesto {
     id_presupuesto: number;
     id_usuario: number;
@@ -10,7 +12,7 @@ export interface Presupuesto {
     total_gastos_planificados: number;
     total_ahorro_planificado: number;
     fecha_creacion: string;
-    estado: string;
+    estado: PresupuestoEstado;
     creado_en: string;
     modificado_en?: string;
     creado_por?: number;

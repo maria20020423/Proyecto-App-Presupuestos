@@ -13,6 +13,9 @@ CREATE PROCEDURE SP_INSERTAR_PRESUPUESTO (
     creado_en TIMESTAMP,
     creado_por INTEGER
 )
+RETURNS (
+    nuevo_id_presupuesto INTEGER
+)
 AS
 BEGIN
     INSERT INTO PRESUPUESTO (
@@ -24,5 +27,7 @@ BEGIN
         :id_usuario, :nombre_presupuesto, :anio_inicio, :mes_inicio, :anio_fin, :mes_fin,
         :total_ingresos_planificados, :total_gastos_planificados, :total_ahorro_planificado,
         :fecha_creacion, :estado, :creado_en, :creado_por
-    );
+    )
+    RETURNING id_presupuesto INTO nuevo_id_presupuesto;
+    SUSPEND;
 END#

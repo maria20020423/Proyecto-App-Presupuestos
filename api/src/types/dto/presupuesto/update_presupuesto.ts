@@ -1,5 +1,7 @@
 
 
+import type { PresupuestoEstado } from '../../types/common/presupuesto.js';
+
 export interface UpdatePresupuestoDto {
     id_usuario: number;
     nombre_presupuesto: string;
@@ -10,6 +12,6 @@ export interface UpdatePresupuestoDto {
     total_ingresos_planificados: number;
     total_gastos_planificados: number;
     total_ahorro_planificado: number;
-    estado: string;
+    estado: PresupuestoEstado;
     modificado_por: number;
 }
