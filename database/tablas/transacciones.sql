@@ -6,12 +6,19 @@ CREATE TABLE TRANSACCIONES (
     mes INTEGER NOT NULL,
     subcategoria_id INTEGER NOT NULL, -- FK
     obligacion_id INTEGER,            -- FK
+    tipo VARCHAR(20) NOT NULL,
     descripcion VARCHAR(500),
     monto NUMERIC(15,2),
     fecha DATE,
+    metodo_pago VARCHAR(30),
     no_factura VARCHAR(500),
+    observaciones VARCHAR(500),
+    estado VARCHAR(20) DEFAULT 'activo' NOT NULL,
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP  NOT NULL,
     modificado_en TIMESTAMP DEFAULT NULL,
     creado_por INTEGER,
-    modificado_por INTEGER DEFAULT NULL
+    modificado_por INTEGER DEFAULT NULL,
+    CHECK (mes BETWEEN 1 AND 12),
+    CHECK (tipo IN ('ingreso', 'gasto', 'ahorro')),
+    CHECK (estado IN ('activo', 'inactivo'))
 )#
