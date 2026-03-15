@@ -146,6 +146,286 @@ CREATE TABLE USUARIO (
 )#
 
 
+CREATE FUNCTION FN_CALCULAR_MONTO_EJECUTADO (
+    p_id_subcategoria INTEGER,
+    p_id_presupuesto INTEGER,
+    p_anio INTEGER,
+    p_mes INTEGER
+)
+RETURNS NUMERIC(15, 2)
+AS
+DECLARE VARIABLE v_total NUMERIC(15, 2);
+BEGIN
+    SELECT COALESCE(SUM(monto), 0)
+    FROM TRANSACCIONES
+    WHERE subcategoria_id = :p_id_subcategoria
+      AND presupuesto_id = :p_id_presupuesto
+      AND anio = :p_anio
+      AND mes = :p_mes
+    INTO :v_total;
+
+    RETURN COALESCE(v_total, 0);
+END#
+
+
+CREATE FUNCTION FN_CALCULAR_MONTO_PRESUPUESTADO_SUBCATEGORIA (
+    p_id_presupuesto INTEGER,
+    p_id_subcategoria INTEGER
+)
+RETURNS NUMERIC(15, 2)
+AS
+DECLARE VARIABLE v_monto NUMERIC(15, 2);
+BEGIN
+    SELECT monto_mensual
+    FROM DETALLE_PRESUPUESTO
+    WHERE presupuesto_id = :p_id_presupuesto
+      AND subcategoria_id = :p_id_subcategoria
+      AND estado = 'activo'
+    INTO :v_monto;
+
+    RETURN COALESCE(v_monto, 0);
+END#
+
+
+CREATE FUNCTION FN_CALCULAR_PORCENTAJE_EJECUTADO (
+    p_id_subcategoria INTEGER,
+    p_id_presupuesto INTEGER,
+    p_anio INTEGER,
+    p_mes INTEGER
+)
+RETURNS NUMERIC(9, 4)
+AS
+DECLARE VARIABLE v_monto_ejecutado NUMERIC(15, 2);
+DECLARE VARIABLE v_monto_presupuestado NUMERIC(15, 2);
+DECLARE VARIABLE v_porcentaje NUMERIC(9, 4);
+BEGIN
+    v_monto_ejecutado = FN_CALCULAR_MONTO_EJECUTADO(:p_id_subcategoria, :p_id_presupuesto, :p_anio, :p_mes);
+    v_monto_presupuestado = FN_CALCULAR_MONTO_PRESUPUESTADO_SUBCATEGORIA(:p_id_presupuesto, :p_id_subcategoria);
+
+    IF (v_monto_presupuestado = 0) THEN
+        RETURN 0;
+
+    v_porcentaje = (v_monto_ejecutado / v_monto_presupuestado) * 100;
+    RETURN v_porcentaje;
+END#
+
+
+CREATE FUNCTION FN_CALCULAR_PROYECCION_GASTO_MENSUAL (
+    p_id_subcategoria INTEGER,
+    p_id_presupuesto INTEGER,
+    p_anio INTEGER,
+    p_mes INTEGER
+)
+RETURNS NUMERIC(15, 2)
+AS
+DECLARE VARIABLE v_monto_ejecutado NUMERIC(15, 2);
+DECLARE VARIABLE v_dia_actual INTEGER;
+DECLARE VARIABLE v_dias_mes INTEGER;
+DECLARE VARIABLE v_proyeccion NUMERIC(15, 2);
+BEGIN
+    IF (FN_VALIDAR_VIGENCIA_PRESUPUESTO(:p_anio, :p_mes, :p_id_presupuesto) = 0) THEN
+        RETURN 0;
+
+    v_monto_ejecutado = FN_CALCULAR_MONTO_EJECUTADO(:p_id_subcategoria, :p_id_presupuesto, :p_anio, :p_mes);
+    v_dia_actual = EXTRACT(DAY FROM CURRENT_DATE);
+    v_dias_mes = EXTRACT(DAY FROM (DATEADD(1 MONTH TO DATEFROMPARTS(:p_anio, :p_mes, 1)) - 1));
+
+    IF (v_dia_actual <= 0 OR v_dias_mes <= 0) THEN
+        RETURN v_monto_ejecutado;
+
+    v_proyeccion = (v_monto_ejecutado / v_dia_actual) * v_dias_mes;
+    RETURN COALESCE(v_proyeccion, v_monto_ejecutado);
+END#
+
+
+CREATE FUNCTION FN_DIAS_HASTA_VENCIMIENTO (
+    p_id_obligacion INTEGER
+)
+RETURNS INTEGER
+AS
+DECLARE VARIABLE v_dia INTEGER;
+DECLARE VARIABLE v_fecha_inicio DATE;
+DECLARE VARIABLE v_fecha_fin DATE;
+DECLARE VARIABLE v_fecha_objetivo DATE;
+DECLARE VARIABLE v_mes INTEGER;
+DECLARE VARIABLE v_anio INTEGER;
+BEGIN
+    SELECT dia_mes_expiracion, fecha_inicio, COALESCE(fecha_final, DATE '9999-12-31')
+    FROM OBLIGACION_FIJA
+    WHERE id = :p_id_obligacion
+    INTO :v_dia, :v_fecha_inicio, :v_fecha_fin;
+
+    IF (v_dia IS NULL) THEN
+        RETURN NULL;
+
+    v_mes = EXTRACT(MONTH FROM CURRENT_DATE);
+    v_anio = EXTRACT(YEAR FROM CURRENT_DATE);
+    v_fecha_objetivo = DATEFROMPARTS(:v_anio, :v_mes, :v_dia);
+
+    IF (v_fecha_objetivo < CURRENT_DATE) THEN
+    BEGIN
+        IF (v_mes = 12) THEN
+        BEGIN
+            v_mes = 1;
+            v_anio = v_anio + 1;
+        END
+        ELSE
+            v_mes = v_mes + 1;
+
+        v_fecha_objetivo = DATEFROMPARTS(:v_anio, :v_mes, :v_dia);
+    END
+
+    IF (v_fecha_objetivo < v_fecha_inicio OR v_fecha_objetivo > v_fecha_fin) THEN
+        RETURN NULL;
+
+    RETURN DATEDIFF(DAY, CURRENT_DATE, v_fecha_objetivo);
+END#
+
+
+CREATE FUNCTION FN_OBTENER_BALANCE_SUBCATEGORIA (
+    p_id_presupuesto INTEGER,
+    p_id_subcategoria INTEGER,
+    p_anio INTEGER,
+    p_mes INTEGER
+)
+RETURNS NUMERIC(15, 2)
+AS
+DECLARE VARIABLE v_monto_presupuestado NUMERIC(15, 2);
+DECLARE VARIABLE v_monto_ejecutado NUMERIC(15, 2);
+BEGIN
+    v_monto_presupuestado = FN_CALCULAR_MONTO_PRESUPUESTADO_SUBCATEGORIA(:p_id_presupuesto, :p_id_subcategoria);
+    v_monto_ejecutado = FN_CALCULAR_MONTO_EJECUTADO(:p_id_subcategoria, :p_id_presupuesto, :p_anio, :p_mes);
+
+    RETURN v_monto_presupuestado - v_monto_ejecutado;
+END#
+
+
+CREATE FUNCTION FN_OBTENER_CATEGORIA_POR_SUBCATEGORIA (
+    p_id_subcategoria INTEGER
+)
+RETURNS INTEGER
+AS
+DECLARE VARIABLE v_id_categoria INTEGER;
+BEGIN
+    SELECT categoria_id
+    FROM SUBCATEGORIA
+    WHERE id = :p_id_subcategoria
+    INTO :v_id_categoria;
+
+    RETURN v_id_categoria;
+END#
+
+
+CREATE FUNCTION FN_OBTENER_PROMEDIO_GASTO_SUBCATEGORIA (
+    p_id_usuario INTEGER,
+    p_id_subcategoria INTEGER,
+    p_cantidad_meses INTEGER
+)
+RETURNS NUMERIC(15, 2)
+AS
+DECLARE VARIABLE v_total NUMERIC(15, 2);
+DECLARE VARIABLE v_promedio NUMERIC(15, 2);
+BEGIN
+    IF (p_cantidad_meses <= 0) THEN
+        RETURN 0;
+
+    SELECT COALESCE(SUM(monto), 0)
+    FROM TRANSACCIONES
+    WHERE id_usuario = :p_id_usuario
+      AND subcategoria_id = :p_id_subcategoria
+      AND estado = 'activo'
+      AND (anio * 100 + mes) >= ((EXTRACT(YEAR FROM CURRENT_DATE) * 100 + EXTRACT(MONTH FROM CURRENT_DATE)) - :p_cantidad_meses)
+    INTO :v_total;
+
+    v_promedio = v_total / :p_cantidad_meses;
+    RETURN COALESCE(v_promedio, 0);
+END#
+
+
+CREATE FUNCTION FN_OBTENER_TOTAL_CATEGORIA_MES (
+    p_id_categoria INTEGER,
+    p_id_presupuesto INTEGER
+)
+RETURNS NUMERIC(15, 2)
+AS
+DECLARE VARIABLE v_total NUMERIC(15, 2);
+BEGIN
+    SELECT COALESCE(SUM(dp.monto_mensual), 0)
+    FROM DETALLE_PRESUPUESTO dp
+    JOIN SUBCATEGORIA s ON s.id = dp.subcategoria_id
+    WHERE dp.presupuesto_id = :p_id_presupuesto
+      AND s.categoria_id = :p_id_categoria
+      AND dp.estado = 'activo'
+    INTO :v_total;
+
+    RETURN COALESCE(v_total, 0);
+END#
+
+
+CREATE FUNCTION FN_OBTENER_TOTAL_EJECUTADO_CATEGORIA_MES (
+    p_id_categoria INTEGER,
+    p_id_presupuesto INTEGER,
+    p_anio INTEGER,
+    p_mes INTEGER
+)
+RETURNS NUMERIC(15, 2)
+AS
+DECLARE VARIABLE v_total NUMERIC(15, 2);
+BEGIN
+    IF (FN_VALIDAR_VIGENCIA_PRESUPUESTO(:p_anio, :p_mes, :p_id_presupuesto) = 0) THEN
+        RETURN 0;
+
+    SELECT COALESCE(SUM(t.monto), 0)
+    FROM TRANSACCIONES t
+    JOIN SUBCATEGORIA s ON s.id = t.subcategoria_id
+    WHERE s.categoria_id = :p_id_categoria
+      AND t.presupuesto_id = :p_id_presupuesto
+      AND t.anio = :p_anio
+      AND t.mes = :p_mes
+      AND t.estado = 'activo'
+    INTO :v_total;
+
+    RETURN COALESCE(v_total, 0);
+END#
+
+
+CREATE FUNCTION FN_VALIDAR_VIGENCIA_PRESUPUESTO (
+    p_anio INTEGER,
+    p_mes INTEGER,
+    p_id_presupuesto INTEGER
+)
+RETURNS SMALLINT
+AS
+DECLARE VARIABLE v_anio_inicio INTEGER;
+DECLARE VARIABLE v_mes_inicio INTEGER;
+DECLARE VARIABLE v_anio_fin INTEGER;
+DECLARE VARIABLE v_mes_fin INTEGER;
+DECLARE VARIABLE v_clave_objetivo INTEGER;
+DECLARE VARIABLE v_clave_inicio INTEGER;
+DECLARE VARIABLE v_clave_fin INTEGER;
+BEGIN
+    IF (p_anio IS NULL OR p_mes IS NULL OR p_id_presupuesto IS NULL) THEN
+        RETURN 0;
+
+    SELECT anio_inicio, mes_inicio, anio_fin, mes_fin
+    FROM PRESUPUESTO
+    WHERE id_presupuesto = :p_id_presupuesto
+    INTO :v_anio_inicio, :v_mes_inicio, :v_anio_fin, :v_mes_fin;
+
+    IF (v_anio_inicio IS NULL) THEN
+        RETURN 0;
+
+    v_clave_inicio = v_anio_inicio * 100 + v_mes_inicio;
+    v_clave_fin = v_anio_fin * 100 + v_mes_fin;
+    v_clave_objetivo = :p_anio * 100 + :p_mes;
+
+    IF (v_clave_objetivo < v_clave_inicio OR v_clave_objetivo > v_clave_fin) THEN
+        RETURN 0;
+
+    RETURN 1;
+END#
+
+
 CREATE PROCEDURE SP_INSERTAR_CATEGORIA (
     p_id_usuario INTEGER,
     p_nombre VARCHAR(500),
