@@ -84,6 +84,9 @@ export default class PresupuestoService {
             const rows = await resultSet.fetch();
             await resultSet.close();
             await transaction.commit();
+                if (!rows[0] || !rows[0][0]) {
+                throw new Error('No se pudo obtener el ID de la categoria creada');
+            }
             return rows[0][0];
         } catch (err) {
             if (transaction) await transaction.rollback();
