@@ -1,4 +1,4 @@
-import { LoginDTO, LoginResponseDTO, CreateCategoriaDto, UpdateCategoriaDto, CategoriaListResponse } from "@/types/api";
+import { LoginDTO, LoginResponseDTO, CreateCategoriaDto, CreateCategoriaResponseDTO, UpdateCategoriaDto, CategoriaListResponse, CreateSubcategoriaDto, CreateSubcategoriaResponseDTO, SubcategoriaListResponse } from "@/types/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -41,10 +41,10 @@ export const categoriaService = {
     return fetchApi<CategoriaListResponse>(`/categorias/${id_categoria}`);
   },
 
-  async create(categoria: CreateCategoriaDto): Promise<{ message: string; id_categoria: number }> {
-    return fetchApi<{ message: string; id_categoria: number }>("/categorias", {
+  async create(id_usuario: number, categoria: CreateCategoriaDto): Promise<CreateCategoriaResponseDTO> {
+    return fetchApi<CreateCategoriaResponseDTO>("/categorias", {
       method: "POST",
-      body: JSON.stringify(categoria),
+      body: JSON.stringify({ ...categoria, id_usuario }),
     });
   },
 
@@ -57,6 +57,25 @@ export const categoriaService = {
 
   async delete(id_categoria: number): Promise<{ message: string }> {
     return fetchApi<{ message: string }>(`/categorias/${id_categoria}`, {
+      method: "DELETE",
+    });
+  },
+};
+
+export const subcategoriaService = {
+  async getByCategoria(id_categoria: number): Promise<SubcategoriaListResponse> {
+    return fetchApi<SubcategoriaListResponse>(`/subcategorias/categoria/${id_categoria}`);
+  },
+
+  async create(id_usuario: number, subcategoria: CreateSubcategoriaDto, categoriaId: number): Promise<CreateSubcategoriaResponseDTO> {
+    return fetchApi<CreateSubcategoriaResponseDTO>("/subcategorias", {
+      method: "POST",
+      body: JSON.stringify({ ...subcategoria, categoria_id: categoriaId, creado_por: id_usuario }),
+    });
+  },
+
+  async delete(id_subcategoria: number): Promise<{ message: string }> {
+    return fetchApi<{ message: string }>(`/subcategorias/${id_subcategoria}`, {
       method: "DELETE",
     });
   },

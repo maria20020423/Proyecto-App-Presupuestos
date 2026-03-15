@@ -60,7 +60,7 @@ export function DataTable<T>({
     id: col.id,
     accessorKey: col.accessorKey as string,
     header: col.header,
-    cell: col.cell,
+    ...(col.cell && { cell: col.cell }),
     sortable: col.sortable ?? true,
     enableColumnFilter: col.filterable ?? true,
   }));

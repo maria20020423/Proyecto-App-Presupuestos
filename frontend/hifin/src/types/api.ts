@@ -1,7 +1,9 @@
-export interface ApiResponse<T = unknown> {
-  message: string;
-  [key: string]: T | string;
-}
+export * from "./common/common.types";
+export * from "./dto/categoria.types";
+export * from "./dto/subcategoria.types";
+export * from "./dto/presupuesto.types";
+
+import { ApiResponse } from "./common/common.types";
 
 export interface LoginDTO {
   correo: string;
@@ -19,33 +21,4 @@ export interface Usuario {
 
 export interface LoginResponseDTO extends ApiResponse {
   usuario: Usuario;
-}
-
-export interface Categoria {
-  id: number;
-  nombre: string;
-  descripcion?: string;
-  tipo_categoria: number;
-  category_icon: string;
-  color_format: string;
-  ui_order: number;
-  creado_en: string;
-  modificado_en?: string;
-  creado_por?: number;
-  modificado_por?: number;
-}
-
-export interface CreateCategoriaDto {
-  id_usuario: number;
-  nombre: string;
-  descripcion?: string;
-  tipo_categoria: number;
-  category_icon?: string;
-  color_format?: string;
-}
-
-export type UpdateCategoriaDto = Partial<CreateCategoriaDto>;
-
-export interface CategoriaListResponse extends ApiResponse {
-  results?: Categoria[];
 }

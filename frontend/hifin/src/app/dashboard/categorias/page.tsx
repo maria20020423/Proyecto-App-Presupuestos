@@ -1,26 +1,27 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { DataTable, TableColumnDef, ActionColumnConfig } from "@/components/ui/Table";
 import { Label } from "@/components/ui/Label";
 import { categoriaService, authStorage } from "@/services/apiClient";
 import { Categoria, CreateCategoriaDto } from "@/types/api";
 
 const CATEGORY_TYPES = [
-  { value: 1, label: "Ingreso" },
-  { value: 2, label: "Gasto" },
+  { value: "ingreso", label: "Ingreso" },
+  { value: "gasto", label: "Gasto" },
 ];
 
 export default function CategoriasPage() {
+  const router = useRouter();
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<CreateCategoriaDto>({
-    id_usuario: 0,
     nombre: "",
     descripcion: "",
-    tipo_categoria: 1,
+    tipo_categoria: "gasto",
     category_icon: "",
     color_format: "#3b82f6",
   });
@@ -54,13 +55,12 @@ export default function CategoriasPage() {
 
     setSubmitting(true);
     try {
-      await categoriaService.create({ ...formData, id_usuario: userId });
+      await categoriaService.create(userId, formData);
       setShowForm(false);
       setFormData({
-        id_usuario: userId,
         nombre: "",
         descripcion: "",
-        tipo_categoria: 1,
+        tipo_categoria: "gasto",
         category_icon: "",
         color_format: "#3b82f6",
       });
@@ -84,6 +84,10 @@ export default function CategoriasPage() {
     }
   };
 
+  const handleViewSubcategorias = (categoria: Categoria) => {
+    router.push(`/dashboard/categorias/${categoria.id}/subcategorias`);
+  };
+
   const columns: TableColumnDef<Categoria>[] = [
     {
       id: "nombre",
@@ -102,8 +106,8 @@ export default function CategoriasPage() {
       cell: ({ row }) => {
         const tipo = CATEGORY_TYPES.find(t => t.value === row.original.tipo_categoria);
         return (
-          <Label variant={row.original.tipo_categoria === 1 ? "success" : "danger"}>
-            {tipo?.label || "Desconocido"}
+          <Label variant={row.original.tipo_categoria === "ingreso" ? "success" : "danger"}>
+            {tipo?.label || row.original.tipo_categoria}
           </Label>
         );
       },
@@ -118,10 +122,27 @@ export default function CategoriasPage() {
         />
       ),
     },
+    {
+      id: "estado",
+      header: "Estado",
+      accessorKey: "estado",
+      cell: ({ row }) => (
+        <Label variant={row.original.estado === "activa" ? "success" : "warning"}>
+          {row.original.estado}
+        </Label>
+      ),
+    },
   ];
 
   const actionConfig: ActionColumnConfig<Categoria> = {
     onDelete: handleDelete,
+    customActions: [
+      {
+        label: "Ver Subcategorías",
+        onClick: handleViewSubcategorias,
+        variant: "outline",
+      },
+    ],
   };
 
   return (
@@ -165,7 +186,7 @@ export default function CategoriasPage() {
                 </label>
                 <select
                   value={formData.tipo_categoria}
-                  onChange={(e) => setFormData({ ...formData, tipo_categoria: parseInt(e.target.value) })}
+                  onChange={(e) => setFormData({ ...formData, tipo_categoria: e.target.value })}
                   className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {CATEGORY_TYPES.map((type) => (
