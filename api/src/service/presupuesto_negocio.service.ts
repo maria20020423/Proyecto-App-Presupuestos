@@ -25,7 +25,7 @@ export default class PresupuestoNegocioService {
         try {
             const resultSet = await this.firebird_client.executeQuery(
                 transaction,
-                `EXECUTE PROCEDURE SP_CREAR_PRESUPUESTO_COMPLETO (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                `SELECT * FROM SP_CREAR_PRESUPUESTO_COMPLETO(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
                     dto.id_usuario,
                     dto.nombre,
