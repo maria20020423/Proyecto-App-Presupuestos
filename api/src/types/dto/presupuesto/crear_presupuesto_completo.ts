@@ -15,5 +15,5 @@ export interface CrearPresupuestoCompletoDto {
 
 // Response DTO
 export interface CrearPresupuestoCompletoResult {
-    id_presupuesto: number;
+    id: number;
 }

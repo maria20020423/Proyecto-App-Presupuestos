@@ -68,7 +68,7 @@ export interface CrearPresupuestoCompletoDto {
 }
 
 export interface CrearPresupuestoCompletoResult {
-  id_presupuesto: number;
+  id: number;
 }
 
 export interface CerrarPresupuestoDto {

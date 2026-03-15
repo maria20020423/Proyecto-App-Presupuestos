@@ -6,7 +6,7 @@ import { DataTable, TableColumnDef, ActionColumnConfig } from "@/components/ui/T
 import { Label } from "@/components/ui/Label";
 import { presupuestoService } from "@/services/presupuesto.service";
 import { authStorage } from "@/services/apiClient";
-import type { CrearPresupuestoCompletoDto, GetPresupuestoResult, PresupuestoEstado } from "@/types/api";
+import type { CrearPresupuestoCompletoDto, CrearPresupuestoCompletoResult, GetPresupuestoResult, PresupuestoEstado } from "@/types/api";
 
 const INITIAL_FORM: CrearPresupuestoCompletoDto = {
   nombre: "",
@@ -81,7 +81,11 @@ export default function PresupuestosPage() {
 
     setSubmitting(true);
     try {
-      await presupuestoService.crearCompleto(userId, formData);
+      const result = await presupuestoService.crearCompleto(userId, formData);
+      if (result?.id) {
+        // Opcional: redirigir directamente al detalle del nuevo presupuesto
+        router.push(`/dashboard/presupuestos/${result.id}`);
+      }
       setShowForm(false);
       setFormData(INITIAL_FORM);
       await loadPresupuestos();
