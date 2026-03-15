@@ -112,3 +112,50 @@ Tailwind CSS v4 uses CSS-first configuration in `globals.css`:
 Use React Context or Zustand for global state:
 - `stores/authStore.ts` - Authentication state
 - `stores/appStore.ts` - App-wide state
+
+## API Client Conventions
+
+### Generic Response Type
+
+All API endpoints return a consistent response structure that includes a `message` field for notifications and error handling. Use this generic type for all API calls:
+
+```typescript
+// Generic API response wrapper
+interface ApiResponse<T> {
+  message: string;
+  [key: string]: T | string;
+}
+```
+
+### Example Usage
+
+```typescript
+// Login response
+interface LoginResponseDTO {
+  message: string;
+  usuario: {
+    id_usuario: number;
+    nombre: string;
+    apellido: string;
+    correo_electronico: string;
+    salario_mensual_base: number;
+    estado: string;
+  };
+}
+
+// Login request
+interface LoginDTO {
+  correo: string;
+  contrasena: string;
+}
+```
+
+### Environment Configuration
+
+Create `.env.local` in the project root with the API base URL:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
+
+The API client should automatically prepend this URL to all endpoints.

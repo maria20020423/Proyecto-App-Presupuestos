@@ -19,15 +19,15 @@ const PORT = 3000;
 
 
 const corsOptions: CorsOptions = {
-  origin: "http://localhost:8081"
+  origin: "http://localhost:3001"
 };
 app.use(express.json());
 
 const client=createNativeClient(getDefaultLibraryFilename());
     // Connection options
   const options = {
-    username: 'maria', // Default username
-    password: 'mariita', // Default password
+    username: 'SYSDBA', // Default username
+    password: 'maria', // Default password
     sessionTimeZone: 'UTC', // Set session time zone to UT
     lowerCaseKeys: true,
     
