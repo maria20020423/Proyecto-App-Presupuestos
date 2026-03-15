@@ -11,6 +11,8 @@ import CategoriaService from './service/categoria.service.js';
 import categoriaRouter from './routes/categorias.js';
 import SubcategoriaService from './service/subcategoria.service.js';
 import subcategoriaRouter from './routes/subcategorias.js';
+import PresupuestoNegocioService from './service/presupuesto_negocio.service.js';
+import presupuestoNegocioRouter from './routes/presupuesto_negocio.js';
 import { lowercaseResponseMiddleware } from './middleware/lowercaseResponse.js';
 const app = express();
 const PORT = 3000;
@@ -39,6 +41,7 @@ const userService = new UserService(attachment);
 const presupuestoService = new PresupuestoService(attachment);
 const categoriaService = new CategoriaService(attachment);
 const subcategoriaService = new SubcategoriaService(attachment);
+const presupuestoNegocioService = new PresupuestoNegocioService(attachment);
 
 
 app.use(cors(corsOptions));
@@ -47,6 +50,7 @@ app.use('/usuarios', userRouter(userService));
 app.use('/presupuesto',presupuestoRouter(presupuestoService));
 app.use('/categorias', categoriaRouter(categoriaService));
 app.use('/subcategorias', subcategoriaRouter(subcategoriaService));
+app.use('/negocio', presupuestoNegocioRouter(presupuestoNegocioService));
 
 app.get('/', (req: Request, res: Response) => {
   res.send({ message: 'TypeScript API is humming along!' });
