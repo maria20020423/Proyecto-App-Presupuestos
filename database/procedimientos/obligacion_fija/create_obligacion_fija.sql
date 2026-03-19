@@ -2,10 +2,10 @@
 CREATE PROCEDURE SP_INSERTAR_OBLIGACION_FIJA (
     p_id_usuario INTEGER,
     p_subcategoria_id INTEGER,
-    p_monto NUMERIC(15,2),
     p_nombre VARCHAR(500),
     p_descripcion VARCHAR(500),
     p_dia_mes_expiracion INTEGER,
+    p_monto NUMERIC(15,2),
     p_is_vigente BOOLEAN,
     p_fecha_inicio DATE,
     p_fecha_final DATE,
