@@ -12,28 +12,80 @@
 
 ```
 src/
-├── app/                    # App Router (file-based routing)
-│   ├── (auth)/            # Auth group (no layout)
-│   │   └── login/        # /login
-│   │   └── register/    # /register
-│   ├── (dashboard)/      # Dashboard group with persistent layout
-│   │   ├── layout.tsx   # DashboardLayout (Sidebar + Header)
-│   │   ├── page.tsx      # /dashboard (home)
-│   │   ├── categorias/   # /dashboard/categorias
-│   │   ├── transacciones/ # /dashboard/transacciones
-│   │   ├── presupuestos/ # /dashboard/presupuestos
-│   │   └── reportes/     # /dashboard/reportes
-│   ├── layout.tsx        # Root layout (providers, fonts)
-│   └── page.tsx          # Redirect to dashboard or login
-├── components/            # Reusable components
-│   ├── ui/               # Base UI components (Button, Input, Card...)
-│   ├── layout/           # Layout components (Sidebar, Header)
-│   └── features/         # Feature-specific components
-├── lib/                   # Utilities, hooks, configurations
-├── services/             # API calls
-├── types/                 # TypeScript types
-└── stores/               # State management (Zustand/Context)
+├── app/                           # App Router (file-based routing)
+│   ├── login/                    # /login (auth page)
+│   │   ├── components/           # Login-specific components (LoginForm, etc.)
+│   │   └── page.tsx             # Login page component
+│   ├── dashboard/               # Dashboard group with persistent layout
+│   │   ├── layout.tsx          # DashboardLayout (Sidebar + Header)
+│   │   ├── page.tsx            # /dashboard (home)
+│   │   ├── categorias/         # /dashboard/categorias
+│   │   │   ├── [categoriaId]/  # Dynamic route for categoria details
+│   │   │   │   └── subcategorias/
+│   │   │   │       └── page.tsx
+│   │   │   └── page.tsx
+│   │   ├── transacciones/      # /dashboard/transacciones
+│   │   │   └── page.tsx
+│   │   ├── presupuestos/       # /dashboard/presupuestos
+│   │   │   ├── [id_presupuesto]/ # Dynamic route for presupuesto details
+│   │   │   │   └── page.tsx
+│   │   │   └── page.tsx
+│   │   └── reportes/           # /dashboard/reportes
+│   │       └── page.tsx
+│   ├── globals.css             # Global styles and Tailwind config
+│   ├── layout.tsx              # Root layout (providers, fonts)
+│   ├── favicon.ico             # Favicon
+│   └── page.tsx                # Redirect to dashboard or login
+├── components/                  # Global reusable components only
+│   ├── ui/                     # Base UI components (Button, Input, Table, Label, Select)
+│   └── layout/                 # Layout components (Sidebar, Header, DashboardLayout)
+├── services/                   # API calls
+│   ├── apiClient.ts           # Base API client
+│   ├── detalle-presupuesto.service.ts
+│   └── presupuesto.service.ts
+├── types/                      # TypeScript types
+│   ├── dto/                   # Entity-specific DTOs
+│   │   ├── categoria.types.ts
+│   │   ├── detalle-presupuesto.types.ts
+│   │   ├── presupuesto.types.ts
+│   │   └── subcategoria.types.ts
+│   ├── common/                # Generic/shared types
+│   │   └── common.types.ts
+│   └── api.ts                 # Barrel file exporting all types
+└── middleware.ts              # Next.js middleware
 ```
+
+## File Naming and Casing Conventions
+
+**Strict naming conventions must be followed:**
+
+- **Services**: kebab-case with `.service.ts` suffix
+  - `detalle-presupuesto.service.ts` (not `detallePresupuesto.service.ts`)
+  - `presupuesto.service.ts` (not `presupuestoService.ts`)
+
+- **Types**: kebab-case with `.types.ts` suffix in `dto/` folder
+  - `categoria.types.ts` (not `categoriaTypes.ts`)
+  - `detalle-presupuesto.types.ts` (not `detallePresupuesto.types.ts`)
+
+- **Components**: PascalCase with `.tsx` suffix
+  - `DetallePresupuestoForm.tsx` (not `detalle-presupuesto-form.tsx`)
+  - `DashboardLayout.tsx` (not `dashboard-layout.tsx`)
+
+- **UI Components**: PascalCase with `.tsx` suffix
+  - `Button.tsx`, `Input.tsx`, `Table.tsx`, `Label.tsx`, `Select.tsx`
+
+**Rule: One entity per file**
+- Each service gets its own file with the entity name
+- Each type definition gets its own file with the entity name
+- Never combine multiple entities in a single service or type file
+
+**Component Location Rules**
+- Global reusable components: `src/components/ui/` and `src/components/layout/`
+- Entity-specific components: Keep within the entity's route folder
+  - Login components: `src/app/login/components/`
+  - Categoria components: `src/app/dashboard/categorias/components/`
+  - Presupuesto components: `src/app/dashboard/presupuestos/components/`
+  - etc.
 
 ## Routing Conventions
 

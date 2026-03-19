@@ -15,6 +15,10 @@ import PresupuestoNegocioService from './service/presupuesto_negocio.service.js'
 import presupuestoNegocioRouter from './routes/presupuesto_negocio.js';
 import DetallePresupuestoService from './service/detalle_presupuesto.service.js';
 import detallePresupuestoRouter from './routes/detalle_presupuesto.js';
+import TransaccionesService from './service/transacciones.service.js';
+import transaccionesRouter from './routes/transacciones.js';
+import ObligacionFijaService from './service/obligacion_fija.service.js';
+import obligacionFijaRouter from './routes/obligacion_fija.js';
 import { lowercaseResponseMiddleware } from './middleware/lowercaseResponse.js';
 const app = express();
 const PORT = 3000;
@@ -45,6 +49,8 @@ const categoriaService = new CategoriaService(attachment);
 const subcategoriaService = new SubcategoriaService(attachment);
 const presupuestoNegocioService = new PresupuestoNegocioService(attachment);
 const detallePresupuestoService = new DetallePresupuestoService(attachment);
+const transaccionesService = new TransaccionesService(attachment);
+const obligacionFijaService = new ObligacionFijaService(attachment);
 
 
 app.use(cors(corsOptions));
@@ -55,6 +61,8 @@ app.use('/categorias', categoriaRouter(categoriaService));
 app.use('/subcategorias', subcategoriaRouter(subcategoriaService));
 app.use('/negocio', presupuestoNegocioRouter(presupuestoNegocioService));
 app.use('/detalle-presupuesto', detallePresupuestoRouter(detallePresupuestoService));
+app.use('/transacciones', transaccionesRouter(transaccionesService));
+app.use('/obligacion-fija', obligacionFijaRouter(obligacionFijaService));
 
 app.get('/', (req: Request, res: Response) => {
   res.send({ message: 'TypeScript API is humming along!' });

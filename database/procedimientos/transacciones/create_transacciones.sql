@@ -57,4 +57,4 @@ BEGIN
     )
     RETURNING id INTO id_transacciones;
     SUSPEND;
-END
+END#

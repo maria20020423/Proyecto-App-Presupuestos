@@ -4,7 +4,7 @@ CREATE PROCEDURE SP_ELIMINAR_OBLIGACION_FIJA (
 AS
 BEGIN
     UPDATE OBLIGACION_FIJA
-    SET estado = 'inactivo',
+    SET is_vigente = FALSE,
         modificado_en = CURRENT_TIMESTAMP
     WHERE id = :p_id_obligacion_fija;
 END#

@@ -38,4 +38,4 @@ BEGIN
         modificado_en = CURRENT_TIMESTAMP,
         modificado_por = :p_modificado_por
     WHERE id = :p_id_transacciones;
-END
+END#

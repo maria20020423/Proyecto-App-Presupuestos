@@ -34,7 +34,7 @@ export default (presupuestoService: PresupuestoService): Router => {
     }
     try {
       const result = await presupuestoService.getPresupuestoById(id_presupuesto);
-      return res.status(200).json({ message: 'Presupuesto fetched', results: result });
+      return res.status(200).json({ message: 'Presupuesto fetched', results: [result] });
     } catch (err) {
       return res.status(500).json({ message: 'Error fetching presupuesto', error: `${err}` });
     }

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { DataTable, TableColumnDef } from "@/components/ui/Table";
 import { Label } from "@/components/ui/Label";
-import { DetallePresupuestoForm } from "@/components/features/DetallePresupuestoForm";
+import { DetallePresupuestoForm } from "@/app/dashboard/presupuestos/components/DetallePresupuestoForm";
 import { presupuestoService } from "@/services/presupuesto.service";
 import { detallePresupuestoService } from "@/services/detalle-presupuesto.service";
 import type {
@@ -180,7 +180,7 @@ export default function PresupuestoDetallePage() {
             onClick={() => setShowForm(true)}
             className="text-sm text-blue-600 hover:text-blue-800"
           >
-            Configurar distribución
+            Agregar Detalle
           </button>
         </div>
         <DataTable

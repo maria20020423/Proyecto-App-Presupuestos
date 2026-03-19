@@ -1,6 +1,4 @@
--- SP_LISTAR_TRANSACCIONES
--- Devuelve todos los registros de la tabla TRANSACCIONES.
-CREATE PROCEDURE SP_LISTAR_TRANSACCIONES
+CREATE OR ALTER PROCEDURE SP_LISTAR_TRANSACCIONES
 RETURNS (
     id INTEGER,
     id_usuario INTEGER,
@@ -25,42 +23,18 @@ RETURNS (
 AS
 BEGIN
     FOR SELECT 
-        id,
-        id_usuario,
-        presupuesto_id,
-        anio,
-        mes,
-        subcategoria_id,
-        obligacion_id,
-        tipo,
-        descripcion,
-        monto,
-        fecha,
-        metodo_pago,
-        no_factura,
-        observaciones,
-        estado,
-        creado_en,
-        modificado_en,
-        creado_por,
-        modificado_por
+        id, id_usuario, presupuesto_id, anio, mes, 
+        subcategoria_id, obligacion_id, tipo, descripcion, 
+        monto, fecha, metodo_pago, no_factura, observaciones, 
+        estado, creado_en, modificado_en, creado_por, modificado_por
     FROM TRANSACCIONES
     INTO 
-        :id,
-        :id_usuario,
-        :presupuesto_id,
-        :anio,
-        :mes,
-        :subcategoria_id,
-        :obligacion_id,
-        :descripcion,
-        :monto,
-        :fecha,
-        :no_factura,
-        :creado_en,
-        :modificado_en,
-        :creado_por,
-        :modificado_por
+        :id, :id_usuario, :presupuesto_id, :anio, :mes, 
+        :subcategoria_id, :obligacion_id, :tipo, :descripcion, 
+        :monto, :fecha, :metodo_pago, :no_factura, :observaciones, 
+        :estado, :creado_en, :modificado_en, :creado_por, :modificado_por
     DO
+    BEGIN
         SUSPEND;
-END
+    END
+END#
