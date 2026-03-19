@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { DataTable, TableColumnDef } from "@/components/ui/Table";
 import { Label } from "@/components/ui/Label";
+import { DetallePresupuestoForm } from "@/components/features/DetallePresupuestoForm";
 import { presupuestoService } from "@/services/presupuesto.service";
 import { detallePresupuestoService } from "@/services/detalle-presupuesto.service";
 import type {
@@ -19,10 +20,11 @@ const currencyFormatter = new Intl.NumberFormat("es-HN", {
   minimumFractionDigits: 2,
 });
 
-const estadoColors: Record<string, string> = {
+const estadoColors: Record<string, "success" | "default" | "warning" | "danger" | "info"> = {
   activo: "success",
   cerrado: "default",
   borrador: "warning",
+  inactivo: "default",
 };
 
 export default function PresupuestoDetallePage() {
@@ -35,6 +37,7 @@ export default function PresupuestoDetallePage() {
   const [loadingBudget, setLoadingBudget] = useState(true);
   const [loadingDetalles, setLoadingDetalles] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     if (!Number.isFinite(presupuestoId)) {
@@ -44,34 +47,39 @@ export default function PresupuestoDetallePage() {
       return;
     }
 
-    const loadPresupuesto = async () => {
-      try {
-        setLoadingBudget(true);
-        const response: PresupuestoListResponse = await presupuestoService.getById(presupuestoId);
-        setPresupuesto(response.results?.[0] ?? null);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error cargando presupuesto");
-      } finally {
-        setLoadingBudget(false);
-      }
-    };
-
-    const loadDetalles = async () => {
-      try {
-        setLoadingDetalles(true);
-        const response: DetallePresupuestoListResponse = await detallePresupuestoService.listByPresupuesto(presupuestoId);
-        setDetalles(response.results ?? []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error cargando detalle de presupuesto");
-      } finally {
-        setLoadingDetalles(false);
-      }
-    };
-
     loadPresupuesto();
     loadDetalles();
   }, [presupuestoId]);
+
+  const loadPresupuesto = async () => {
+    try {
+      setLoadingBudget(true);
+      const response: PresupuestoListResponse = await presupuestoService.getById(presupuestoId);
+      setPresupuesto(response.results?.[0] ?? null);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error cargando presupuesto");
+    } finally {
+      setLoadingBudget(false);
+    }
+  };
+
+  const loadDetalles = async () => {
+    try {
+      setLoadingDetalles(true);
+      const response: DetallePresupuestoListResponse = await detallePresupuestoService.listByPresupuesto(presupuestoId);
+      setDetalles(response.results ?? []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error cargando detalle de presupuesto");
+    } finally {
+      setLoadingDetalles(false);
+    }
+  };
+
+  const handleDetalleSuccess = () => {
+    setShowForm(false);
+    loadDetalles(); // Refresh the detalles list
+  };
 
   const columns: TableColumnDef<DetallePresupuesto>[] = useMemo(
     () => [
@@ -79,37 +87,21 @@ export default function PresupuestoDetallePage() {
         id: "subcategoria",
         header: "Subcategoría",
         accessorKey: "subcategoria_id",
-        cell: ({ row }) => (
-          <span className="font-medium text-slate-800">#{row.original.subcategoria_id}</span>
-        ),
       },
       {
         id: "monto",
         header: "Monto mensual",
         accessorKey: "monto_mensual",
-        cell: ({ row }) => (
-          <span className="font-semibold text-slate-900">
-            {currencyFormatter.format(row.original.monto_mensual)}
-          </span>
-        ),
       },
       {
         id: "observaciones",
         header: "Notas",
         accessorKey: "observaciones",
-        cell: ({ row }) => (
-          <p className="text-sm text-slate-600">
-            {row.original.observaciones || "Sin observaciones"}
-          </p>
-        ),
       },
       {
         id: "estado",
         header: "Estado",
         accessorKey: "estado",
-        cell: ({ row }) => (
-          <Label variant={estadoColors[row.original.estado] ?? "default"}>{row.original.estado}</Label>
-        ),
       },
     ],
     []
@@ -184,7 +176,10 @@ export default function PresupuestoDetallePage() {
             <p className="text-sm uppercase tracking-[0.25em] text-slate-400">Distribución</p>
             <h2 className="text-2xl font-semibold text-slate-900">Detalle por subcategoría</h2>
           </div>
-          <button className="text-sm text-blue-600 hover:text-blue-800">
+          <button 
+            onClick={() => setShowForm(true)}
+            className="text-sm text-blue-600 hover:text-blue-800"
+          >
             Configurar distribución
           </button>
         </div>
@@ -196,6 +191,14 @@ export default function PresupuestoDetallePage() {
           emptyMessage="Aún no has definido subcategorías para este presupuesto"
         />
       </section>
+
+      {showForm && (
+        <DetallePresupuestoForm
+          presupuestoId={presupuestoId}
+          onSuccess={handleDetalleSuccess}
+          onCancel={() => setShowForm(false)}
+        />
+      )}
     </div>
   );
 }

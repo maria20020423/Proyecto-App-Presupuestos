@@ -29,7 +29,7 @@ export interface TableColumnDef<T> {
   id: string;
   header: string;
   accessorKey?: keyof T;
-  cell?: (row: Row<T>) => React.ReactNode;
+  cell?: (context: { row: Row<T> }) => React.ReactNode;
   sortable?: boolean;
   filterable?: boolean;
 }
