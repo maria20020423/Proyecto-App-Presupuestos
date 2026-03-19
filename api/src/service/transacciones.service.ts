@@ -10,19 +10,26 @@ export default class TransaccionesService {
         this.firebird_client = firebird_client;
     }
 
-    // SELECT - returns array of all transactions
-    public async getTransacciones(): Promise<GetTransaccionResult[]> {
+    // SELECT - returns array of transactions filtered by presupuesto, anio, mes, tipo
+    public async getTransacciones(
+        id_presupuesto: number | null,
+        anio: number | null,
+        mes: number | null,
+        tipo: string | null
+    ): Promise<GetTransaccionResult[]> {
         const transaction = await this.firebird_client.startTransaction();
         try {
             const resultSet = await this.firebird_client.executeQuery(
                 transaction,
-                "SELECT * FROM SP_LISTAR_TRANSACCIONES;"
+                "SELECT * FROM SP_LISTAR_TRANSACCIONES_PRESUPUESTO(?, ?, ?, ?);",
+                [id_presupuesto, anio, mes, tipo]
             );
             const rows = await resultSet.fetchAsObject<GetTransaccionResult>();
             await resultSet.close();
             await transaction.commit();
             return rows;
         } catch (err) {
+            await transaction.rollback();
             throw new Error(`Error fetching transacciones: ${err}`);
         }
     }
@@ -62,7 +69,7 @@ export default class TransaccionesService {
                     transaccion.tipo,
                     transaccion.descripcion,
                     transaccion.monto,
-                    transaccion.fecha,
+                    new Date(transaccion.fecha || new Date()),
                     transaccion.metodo_pago,
                     transaccion.no_factura,
                     transaccion.observaciones,
@@ -100,7 +107,7 @@ export default class TransaccionesService {
                     transaccion.tipo,
                     transaccion.descripcion,
                     transaccion.monto,
-                    transaccion.fecha,
+                    new Date(transaccion.fecha || new Date()),
                     transaccion.metodo_pago,
                     transaccion.no_factura,
                     transaccion.observaciones,

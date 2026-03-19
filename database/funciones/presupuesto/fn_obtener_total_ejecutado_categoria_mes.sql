@@ -13,7 +13,7 @@ BEGIN
 
     SELECT COALESCE(SUM(t.monto), 0)
     FROM TRANSACCIONES t
-    JOIN SUBCATEGORIA s ON s.id = t.subcategoria_id
+    INNER JOIN SUBCATEGORIA s ON s.id = t.subcategoria_id
     WHERE s.categoria_id = :p_id_categoria
       AND t.presupuesto_id = :p_id_presupuesto
       AND t.anio = :p_anio

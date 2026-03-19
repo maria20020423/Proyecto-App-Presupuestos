@@ -134,6 +134,12 @@ export default function PresupuestoDetallePage() {
               </Label>
             )}
             <button
+              onClick={() => router.push(`/dashboard/presupuestos/${presupuestoId}/transacciones`)}
+              className="bg-blue-500 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg hover:-translate-y-0.5 hover:shadow-xl transition"
+            >
+              Ver Transacciones
+            </button>
+            <button
               onClick={() => router.push("/dashboard/presupuestos")}
               className="bg-white text-slate-900 font-semibold px-6 py-3 rounded-2xl shadow-lg hover:-translate-y-0.5 hover:shadow-xl transition"
             >

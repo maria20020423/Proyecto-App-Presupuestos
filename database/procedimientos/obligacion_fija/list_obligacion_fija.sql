@@ -1,4 +1,7 @@
-CREATE PROCEDURE SP_LISTAR_OBLIGACION_FIJA
+CREATE PROCEDURE SP_LISTAR_OBLIGACION_FIJA (
+    p_id_usuario INTEGER,
+    p_is_vigente BOOLEAN
+)
 RETURNS (
     id INTEGER,
     id_usuario INTEGER,
@@ -31,6 +34,8 @@ BEGIN
         creado_por,
         modificado_por
     FROM OBLIGACION_FIJA
+    WHERE id_usuario = COALESCE(:p_id_usuario, id_usuario)
+      AND is_vigente = COALESCE(:p_is_vigente, is_vigente)
     INTO 
         :id,
         :id_usuario,

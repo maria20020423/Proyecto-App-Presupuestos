@@ -4,10 +4,19 @@ import TransaccionesService from '../service/transacciones.service.js';
 export default (transaccionesService: TransaccionesService): Router => {
   const router = Router();
 
-  // GET all
+  // GET all with optional filters
   router.get('/', async (req, res) => {
+    const id_presupuesto = req.query.id_presupuesto ? parseInt(req.query.id_presupuesto as string) : null;
+    const anio = req.query.anio ? parseInt(req.query.anio as string) : null;
+    const mes = req.query.mes ? parseInt(req.query.mes as string) : null;
+    const tipo = req.query.tipo ? (req.query.tipo as string) : null;
+
+    if (!id_presupuesto) {
+      return res.status(400).json({ message: "id_presupuesto is required" });
+    }
+    
     try {
-      const result = await transaccionesService.getTransacciones();
+      const result = await transaccionesService.getTransacciones(id_presupuesto, anio, mes, tipo);
       return res.status(200).json({ message: "Fetching transacciones", results: result });
     } catch (err) {
       return res.status(500).json({ message: "Error fetching transacciones", error: err });

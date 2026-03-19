@@ -10,12 +10,16 @@ export default class ObligacionFijaService {
         this.firebird_client = firebird_client;
     }
 
-    public async getObligaciones(): Promise<GetObligacionFijaResult[]> {
+    public async getObligaciones(
+        id_usuario: number | null,
+        estado: boolean| null
+    ): Promise<GetObligacionFijaResult[]> {
         const transaction = await this.firebird_client.startTransaction();
         try {
             const resultSet = await this.firebird_client.executeQuery(
                 transaction,
-                "SELECT * FROM SP_LISTAR_OBLIGACION_FIJA;"
+                "SELECT * FROM SP_LISTAR_OBLIGACION_FIJA(?, ?);",   
+                [id_usuario, estado]
             );
             const rows = await resultSet.fetchAsObject<GetObligacionFijaResult>();
             await resultSet.close();

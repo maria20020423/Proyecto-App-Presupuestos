@@ -74,7 +74,7 @@ BEGIN
 
     SELECT c.tipo_categoria, c.id_usuario
     FROM SUBCATEGORIA s
-    JOIN CATEGORIA c ON c.id = s.categoria_id
+    INNER JOIN CATEGORIA c ON c.id = s.categoria_id
     WHERE s.id = :p_id_subcategoria
     INTO :v_tipo_categoria, :v_categoria_usuario;
 

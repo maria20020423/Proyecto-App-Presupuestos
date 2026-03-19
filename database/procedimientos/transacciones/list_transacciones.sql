@@ -1,4 +1,9 @@
-CREATE OR ALTER PROCEDURE SP_LISTAR_TRANSACCIONES
+CREATE PROCEDURE SP_LISTAR_TRANSACCIONES_PRESUPUESTO (
+    p_id_presupuesto INTEGER,
+    p_anio INTEGER,
+    p_mes INTEGER,
+    p_tipo VARCHAR(20)
+)
 RETURNS (
     id INTEGER,
     id_usuario INTEGER,
@@ -28,6 +33,10 @@ BEGIN
         monto, fecha, metodo_pago, no_factura, observaciones, 
         estado, creado_en, modificado_en, creado_por, modificado_por
     FROM TRANSACCIONES
+    WHERE presupuesto_id = COALESCE(:p_id_presupuesto, presupuesto_id)
+      AND anio = COALESCE(:p_anio, anio)
+      AND mes = COALESCE(:p_mes, mes)
+      AND tipo = COALESCE(:p_tipo, tipo)
     INTO 
         :id, :id_usuario, :presupuesto_id, :anio, :mes, 
         :subcategoria_id, :obligacion_id, :tipo, :descripcion, 

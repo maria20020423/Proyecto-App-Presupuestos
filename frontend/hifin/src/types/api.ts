@@ -3,6 +3,7 @@ export * from "./dto/categoria.types";
 export * from "./dto/subcategoria.types";
 export * from "./dto/presupuesto.types";
 export * from "./dto/detalle-presupuesto.types";
+export * from "./dto/transacciones.types";
 
 import { ApiResponse } from "./common/common.types";
 

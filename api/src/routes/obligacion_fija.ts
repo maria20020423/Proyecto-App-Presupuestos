@@ -4,10 +4,13 @@ import ObligacionFijaService from '../service/obligacion_fija.service.js';
 export default (obligacionFijaService: ObligacionFijaService): Router => {
   const router = Router();
 
-  // GET all
+  // GET all with optional filters
   router.get('/', async (req, res) => {
+    const id_usuario = req.query.id_usuario ? parseInt(req.query.id_usuario as string) : null;
+    const is_vigente = req.query.is_vigente ? req.query.is_vigente === 'true' : true;
+    
     try {
-      const result = await obligacionFijaService.getObligaciones();
+      const result = await obligacionFijaService.getObligaciones(id_usuario,is_vigente);
       return res.status(200).json({ message: "Fetching obligaciones fijas", results: result });
     } catch (err) {
       return res.status(500).json({ message: "Error fetching obligaciones fijas", error: err });
@@ -51,10 +54,11 @@ export default (obligacionFijaService: ObligacionFijaService): Router => {
     }
   });
 
-  // DELETE
+  // DELETE (soft delete)
   router.delete('/:id_obligacion', async (req, res) => {
+    const id_obligacion = parseInt(req.params.id_obligacion);
+    
     try {
-      const id_obligacion = parseInt(req.params.id_obligacion);
       await obligacionFijaService.deleteObligacion(id_obligacion);
       return res.status(200).json({ message: "Obligacion fija deleted successfully" });
     } catch (err) {
