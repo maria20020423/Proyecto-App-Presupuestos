@@ -58,8 +58,8 @@ export default class ObligacionFijaService {
                     obligacion.descripcion,
                     obligacion.dia_mes_expiracion,
                     obligacion.is_vigente,
-                    obligacion.fecha_inicio,
-                    obligacion.fecha_final,
+                    new Date(obligacion.fecha_inicio),
+                    new Date(obligacion.fecha_final),
                     obligacion.creado_por
                 ]
             );
@@ -90,8 +90,8 @@ export default class ObligacionFijaService {
                     obligacion.descripcion,
                     obligacion.dia_mes_expiracion,
                     obligacion.is_vigente,
-                    obligacion.fecha_inicio,
-                    obligacion.fecha_final,
+                    new Date(obligacion.fecha_inicio),
+                    new Date(obligacion.fecha_final),
                     obligacion.modificado_por
                 ]
             );
