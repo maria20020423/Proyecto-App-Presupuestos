@@ -1,4 +1,4 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import UserService from '../service/user.service.js';
 
 
@@ -12,8 +12,8 @@ export default (userService: UserService): Router => {
   userRouter.get("/all",userService.getUsers);
   userRouter.get("/:id_usuario",userService.getUser); 
   userRouter.post("/create",userService.createUser);
+  userRouter.post("/login", userService.loginUser);
 
   return userRouter;
 };
-
 

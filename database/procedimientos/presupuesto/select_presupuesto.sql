@@ -1,5 +1,5 @@
 CREATE PROCEDURE SP_CONSULTAR_PRESUPUESTO (
-    id_presupuesto INTEGER
+    p_id_presupuesto INTEGER
 )
 RETURNS (
     id_presupuesto INTEGER,
@@ -26,7 +26,7 @@ BEGIN
         total_ingresos_planificados, total_gastos_planificados, total_ahorro_planificado,
         fecha_creacion, estado, creado_en, modificado_en, creado_por, modificado_por
     FROM PRESUPUESTO
-    WHERE id_presupuesto = :id_presupuesto
+    WHERE id_presupuesto = :p_id_presupuesto
     INTO 
         :id_presupuesto, :id_usuario, :nombre_presupuesto, :anio_inicio, :mes_inicio, :anio_fin, :mes_fin,
         :total_ingresos_planificados, :total_gastos_planificados, :total_ahorro_planificado,

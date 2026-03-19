@@ -4,6 +4,7 @@ import SubcategoriaService from '../service/subcategoria.service.js';
 export default (subcategoriaService: SubcategoriaService): Router => {
     const router = Router();
 
+
     router.get('/categoria/:id_categoria', async (req, res) => {
         const id_categoria = Number(req.params.id_categoria);
         if (Number.isNaN(id_categoria)) {

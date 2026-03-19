@@ -11,21 +11,29 @@ import CategoriaService from './service/categoria.service.js';
 import categoriaRouter from './routes/categorias.js';
 import SubcategoriaService from './service/subcategoria.service.js';
 import subcategoriaRouter from './routes/subcategorias.js';
+import PresupuestoNegocioService from './service/presupuesto_negocio.service.js';
+import presupuestoNegocioRouter from './routes/presupuesto_negocio.js';
+import DetallePresupuestoService from './service/detalle_presupuesto.service.js';
+import detallePresupuestoRouter from './routes/detalle_presupuesto.js';
+import TransaccionesService from './service/transacciones.service.js';
+import transaccionesRouter from './routes/transacciones.js';
+import ObligacionFijaService from './service/obligacion_fija.service.js';
+import obligacionFijaRouter from './routes/obligacion_fija.js';
 import { lowercaseResponseMiddleware } from './middleware/lowercaseResponse.js';
 const app = express();
 const PORT = 3000;
 
 
 const corsOptions: CorsOptions = {
-  origin: "http://localhost:8081"
+  origin: "http://localhost:3001"
 };
 app.use(express.json());
 
 const client=createNativeClient(getDefaultLibraryFilename());
     // Connection options
   const options = {
-    username: 'maria', // Default username
-    password: 'mariita', // Default password
+    username: 'SYSDBA', // Default username
+    password: 'maria', // Default password
     sessionTimeZone: 'UTC', // Set session time zone to UT
     lowerCaseKeys: true,
     
@@ -39,6 +47,10 @@ const userService = new UserService(attachment);
 const presupuestoService = new PresupuestoService(attachment);
 const categoriaService = new CategoriaService(attachment);
 const subcategoriaService = new SubcategoriaService(attachment);
+const presupuestoNegocioService = new PresupuestoNegocioService(attachment);
+const detallePresupuestoService = new DetallePresupuestoService(attachment);
+const transaccionesService = new TransaccionesService(attachment);
+const obligacionFijaService = new ObligacionFijaService(attachment);
 
 
 app.use(cors(corsOptions));
@@ -47,6 +59,10 @@ app.use('/usuarios', userRouter(userService));
 app.use('/presupuesto',presupuestoRouter(presupuestoService));
 app.use('/categorias', categoriaRouter(categoriaService));
 app.use('/subcategorias', subcategoriaRouter(subcategoriaService));
+app.use('/negocio', presupuestoNegocioRouter(presupuestoNegocioService));
+app.use('/detalle-presupuesto', detallePresupuestoRouter(detallePresupuestoService));
+app.use('/transacciones', transaccionesRouter(transaccionesService));
+app.use('/obligacion-fija', obligacionFijaRouter(obligacionFijaService));
 
 app.get('/', (req: Request, res: Response) => {
   res.send({ message: 'TypeScript API is humming along!' });

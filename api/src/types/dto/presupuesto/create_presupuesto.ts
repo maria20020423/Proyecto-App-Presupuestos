@@ -1,3 +1,5 @@
+import type { PresupuestoEstado } from '../../common/presupuesto.js';
+
 export interface CreatePresupuestoDto {
     id_usuario: number;
     nombre_presupuesto: string;
@@ -9,8 +11,7 @@ export interface CreatePresupuestoDto {
     total_gastos_planificados: number;
     total_ahorro_planificado: number;
     fecha_creacion: string;
-    estado: string;
+    estado: PresupuestoEstado;
     creado_en: string;
     creado_por: number;
 }
-

@@ -7,10 +7,13 @@ CREATE PROCEDURE SP_INSERTAR_TRANSACCIONES (
     p_mes INTEGER,
     p_subcategoria_id INTEGER,
     p_obligacion_id INTEGER,
+    p_tipo VARCHAR(20),
     p_descripcion VARCHAR(500),
     p_monto NUMERIC(15,2),
     p_fecha DATE,
+    p_metodo_pago VARCHAR(30),
     p_no_factura VARCHAR(500),
+    p_observaciones VARCHAR(500),
     p_creado_por INTEGER
 )
 RETURNS (
@@ -25,10 +28,13 @@ BEGIN
         mes,
         subcategoria_id,
         obligacion_id,
+        tipo,
         descripcion,
         monto,
         fecha,
+        metodo_pago,
         no_factura,
+        observaciones,
         creado_en,
         creado_por
     )
@@ -39,13 +45,16 @@ BEGIN
         :p_mes,
         :p_subcategoria_id,
         :p_obligacion_id,
+        :p_tipo,
         :p_descripcion,
         :p_monto,
         :p_fecha,
+        :p_metodo_pago,
         :p_no_factura,
+        :p_observaciones,
         CURRENT_TIMESTAMP,
         :p_creado_por
     )
     RETURNING id INTO id_transacciones;
     SUSPEND;
-END
+END#

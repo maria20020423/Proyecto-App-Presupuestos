@@ -1,7 +1,9 @@
 
-import { response, type Request, type RequestHandler, type Response } from "express";
-import type { Attachment } from 'node-firebird-driver-native'
+import { type Request, type RequestHandler, type Response } from "express";
+import type { Attachment } from 'node-firebird-driver-native';
 import type { GetUsuarioResult } from "../types/dto/usuario/get_usuario_result.js";
+import type { LoginDto } from "../types/dto/auth/login.dto.js";
+import type { LoginResultDto } from "../types/dto/auth/login_result.dto.js";
 
 export default class UserService {
     private firebird_client: Attachment;
@@ -33,7 +35,6 @@ export default class UserService {
     };
 
     public getUser: RequestHandler = async (_req: Request, res: Response) => {
-
         const id_usuario = _req.params.id_usuario;
         const transaction = await this.firebird_client.startTransaction();
         const query = "SELECT * FROM SP_CONSULTAR_USUARIO(?);";
@@ -58,7 +59,6 @@ export default class UserService {
     };
 
     public createUser: RequestHandler = async (_req: Request, res: Response) => {
-
         const { nombre, apellido, email, salario_mensual } = _req.body;
         const transaction = await this.firebird_client.startTransaction();
         try {
@@ -77,5 +77,32 @@ export default class UserService {
 
 
 
-    }
+    };
+
+    public loginUser: RequestHandler = async (req: Request<unknown, unknown, LoginDto>, res: Response) => {
+        const { correo } = req.body;
+        const transaction = await this.firebird_client.startTransaction();
+        const query = "SELECT * FROM SP_LOGIN_USUARIO(?);";
+
+        try {
+            const resultSet = await this.firebird_client.executeQuery(
+                transaction,
+                query,
+                [correo]
+            );
+
+            const rows = await resultSet.fetchAsObject<LoginResultDto>();
+            await resultSet.close();
+            await transaction.commit();
+
+            if (!rows.length) {
+                return res.status(401).json({ message: "Credenciales inválidas" });
+            }
+
+            return res.json({ message: "login", usuario: rows[0] });
+        } catch (error) {
+            await transaction.rollback();
+            return res.status(500).json({ message: "Error during login", error });
+        }
+    };
 }

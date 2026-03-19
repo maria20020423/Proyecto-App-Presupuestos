@@ -1,20 +1,16 @@
 
 CREATE PROCEDURE SP_ACTUALIZAR_DETALLE_PRESUPUESTO (
     p_id_detalle_presupuesto INTEGER,
-    p_presupuesto_id INTEGER,
-    p_subcategoria_id INTEGER,
+    p_monto_mensual NUMERIC(15, 2),
     p_observaciones VARCHAR(500),
-    p_monto_mensual NUMERIC(15,2),
-    p_creado_por INTEGER
+    p_modificado_por INTEGER
 )
 AS
 BEGIN
     UPDATE DETALLE_PRESUPUESTO
-    SET presupuesto_id = :p_presupuesto_id,
-        subcategoria_id = :p_subcategoria_id,
+    SET monto_mensual = :p_monto_mensual,
         observaciones = :p_observaciones,
-        monto_mensual = :p_monto_mensual,
-        creado_por = :p_creado_por,
-        modificado_en = CURRENT_TIMESTAMP
+        modificado_en = CURRENT_TIMESTAMP,
+        modificado_por = :p_modificado_por
     WHERE id = :p_id_detalle_presupuesto;
 END#

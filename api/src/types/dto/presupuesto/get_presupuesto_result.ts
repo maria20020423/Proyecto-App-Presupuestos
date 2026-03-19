@@ -1,3 +1,5 @@
+export type PresupuestoEstado = 'activo' | 'cerrado' | 'borrador';
+
 export interface GetPresupuestoResult {
     id_presupuesto: number;
     id_usuario: number;
@@ -10,10 +12,9 @@ export interface GetPresupuestoResult {
     total_gastos_planificados: number;
     total_ahorro_planificado: number;
     fecha_creacion: string;
-    estado: string;
+    estado: PresupuestoEstado;
     creado_en: string;
     modificado_en?: string;
     creado_por?: number;
     modificado_por?: number;
 }
-

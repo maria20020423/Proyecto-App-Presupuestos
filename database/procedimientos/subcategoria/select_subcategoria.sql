@@ -33,7 +33,7 @@ BEGIN
         s.creado_por,
         s.modificado_por
     FROM SUBCATEGORIA s
-    JOIN CATEGORIA c ON c.id = s.categoria_id
+    INNER JOIN CATEGORIA c ON c.id = s.categoria_id
     WHERE s.id = :p_id_subcategoria
     INTO 
         :id,
