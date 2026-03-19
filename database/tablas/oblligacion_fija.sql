@@ -4,6 +4,7 @@ CREATE TABLE OBLIGACION_FIJA (
     subcategoria_id INTEGER NOT NULL, -- FK to SUBCATEGORIA 
     nombre VARCHAR(500) NOT NULL,
     descripcion VARCHAR(500),
+    monto NUMERIC(15,2),
     dia_mes_expiracion INTEGER NOT NULL,
     is_vigente BOOLEAN NOT NULL,
     fecha_inicio DATE NOT NULL,

@@ -7,3 +7,4 @@ CREATE EXCEPTION EX_SUBCATEGORIA_NO_ENCONTRADA 'Subcategoria no encontrada';
 CREATE EXCEPTION EX_SUBCATEGORIA_DEFAULT_NO_ELIMINAR 'No se puede eliminar la subcategoria por defecto';
 CREATE EXCEPTION EX_SUBCATEGORIA_USADA_DETALLE 'La subcategoria se utiliza en detalle de presupuesto';
 CREATE EXCEPTION EX_SUBCATEGORIA_USADA_TRANSACCION 'La subcategoria se utiliza en transacciones';
+CREATE EXCEPTION EX_PRESUPUESTO_CON_TRANSACCIONES 'No se puede eliminar el presupuesto porque tiene transacciones asociadas';
