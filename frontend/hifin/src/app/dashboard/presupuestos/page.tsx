@@ -6,18 +6,20 @@ import { DataTable, TableColumnDef, ActionColumnConfig } from "@/components/ui/T
 import { Label } from "@/components/ui/Label";
 import { presupuestoService } from "@/services/presupuesto.service";
 import { authStorage } from "@/services/apiClient";
-import type { CrearPresupuestoCompletoDto, CrearPresupuestoCompletoResult, GetPresupuestoResult, PresupuestoEstado } from "@/types/api";
+import type { CreatePresupuestoDto, GetPresupuestoResult, PresupuestoEstado } from "@/types/api";
 
-const INITIAL_FORM: CrearPresupuestoCompletoDto = {
-  nombre: "",
-  descripcion: "",
+const INITIAL_FORM: CreatePresupuestoDto = {
+  nombre_presupuesto: "",
   anio_inicio: new Date().getFullYear(),
   mes_inicio: new Date().getMonth() + 1,
   anio_fin: new Date().getFullYear(),
   mes_fin: Math.min(12, new Date().getMonth() + 4),
-  total_ingresos: 0,
-  total_gastos: 0,
-  total_ahorro: 0,
+  total_ingresos_planificados: 0,
+  total_gastos_planificados: 0,
+  total_ahorro_planificado: 0,
+  fecha_creacion: new Date().toISOString(),
+  estado: "borrador",
+  creado_en: new Date().toISOString(),
 };
 
 const currencyFormatter = new Intl.NumberFormat("es-HN", {
@@ -45,7 +47,7 @@ export default function PresupuestosPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState<CrearPresupuestoCompletoDto>(INITIAL_FORM);
+  const [formData, setFormData] = useState<CreatePresupuestoDto>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
 
   const loadPresupuestos = async () => {
@@ -81,10 +83,10 @@ export default function PresupuestosPage() {
 
     setSubmitting(true);
     try {
-      const result = await presupuestoService.crearCompleto(userId, formData);
-      if (result?.id) {
+      const result = await presupuestoService.create(userId, formData);
+      if (result?.id_presupuesto) {
         // Opcional: redirigir directamente al detalle del nuevo presupuesto
-        router.push(`/dashboard/presupuestos/${result.id}`);
+        router.push(`/dashboard/presupuestos/${result.id_presupuesto}`);
       }
       setShowForm(false);
       setFormData(INITIAL_FORM);
@@ -167,7 +169,7 @@ export default function PresupuestosPage() {
   };
 
   const handleInputChange = (
-    key: keyof CrearPresupuestoCompletoDto,
+    key: keyof CreatePresupuestoDto,
     value: string | number
   ) => {
     setFormData((prev) => ({
@@ -193,9 +195,9 @@ export default function PresupuestosPage() {
               onClick={() => setShowForm(true)}
               className="bg-white text-slate-900 font-semibold px-6 py-3 rounded-2xl shadow-lg hover:-translate-y-0.5 hover:shadow-xl transition"
             >
-              Crear presupuesto completo
+              Crear presupuesto
             </button>
-            <span className="text-sm text-blue-100">Cada presupuesto incluye ingresos, gastos y ahorro planificado.</span>
+            <span className="text-sm text-blue-100">Configura los ingresos, gastos y ahorro planificado para tu presupuesto.</span>
           </div>
         </div>
       </section>
@@ -211,7 +213,7 @@ export default function PresupuestosPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Nuevo</p>
-              <h2 className="text-2xl font-semibold text-slate-900">Crear presupuesto completo</h2>
+              <h2 className="text-2xl font-semibold text-slate-900">Crear presupuesto</h2>
             </div>
             <button
               onClick={() => setShowForm(false)}
@@ -226,8 +228,8 @@ export default function PresupuestosPage() {
                 <label className="text-sm font-medium text-slate-600">Nombre</label>
                 <input
                   type="text"
-                  value={formData.nombre}
-                  onChange={(e) => handleInputChange("nombre", e.target.value)}
+                  value={formData.nombre_presupuesto}
+                  onChange={(e) => handleInputChange("nombre_presupuesto", e.target.value)}
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Presupuesto H1 2025"
                   required
@@ -237,10 +239,11 @@ export default function PresupuestosPage() {
                 <label className="text-sm font-medium text-slate-600">Descripción</label>
                 <input
                   type="text"
-                  value={formData.descripcion ?? ""}
-                  onChange={(e) => handleInputChange("descripcion", e.target.value)}
+                  value={""}
+                  onChange={(e) => console.log("Descripción no es requerida en CreatePresupuestoDto")}
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Objetivo del plan"
+                  disabled
                 />
               </div>
             </div>
@@ -301,8 +304,8 @@ export default function PresupuestosPage() {
                 <label className="text-sm font-medium text-slate-600">Ingresos planificados</label>
                 <input
                   type="number"
-                  value={formData.total_ingresos}
-                  onChange={(e) => handleInputChange("total_ingresos", e.target.value)}
+                  value={formData.total_ingresos_planificados}
+                  onChange={(e) => handleInputChange("total_ingresos_planificados", e.target.value)}
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3"
                   min={0}
                   step={100}
@@ -313,8 +316,8 @@ export default function PresupuestosPage() {
                 <label className="text-sm font-medium text-slate-600">Gastos planificados</label>
                 <input
                   type="number"
-                  value={formData.total_gastos}
-                  onChange={(e) => handleInputChange("total_gastos", e.target.value)}
+                  value={formData.total_gastos_planificados}
+                  onChange={(e) => handleInputChange("total_gastos_planificados", e.target.value)}
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3"
                   min={0}
                   step={100}
@@ -325,8 +328,8 @@ export default function PresupuestosPage() {
                 <label className="text-sm font-medium text-slate-600">Ahorro esperado</label>
                 <input
                   type="number"
-                  value={formData.total_ahorro}
-                  onChange={(e) => handleInputChange("total_ahorro", e.target.value)}
+                  value={formData.total_ahorro_planificado}
+                  onChange={(e) => handleInputChange("total_ahorro_planificado", e.target.value)}
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3"
                   min={0}
                   step={100}
@@ -343,7 +346,7 @@ export default function PresupuestosPage() {
               >
                 {submitting ? "Guardando..." : "Guardar presupuesto"}
               </button>
-              <p className="text-sm text-slate-500">Este proceso crea el presupuesto con distribuciones iniciales listas para detallar.</p>
+              <p className="text-sm text-slate-500">Este proceso crea el presupuesto básico listo para configurar detalles.</p>
             </div>
           </form>
         </section>
