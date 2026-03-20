@@ -22,14 +22,9 @@ BEGIN
     WHERE id_presupuesto = :p_id_presupuesto
     INTO :v_presupuesto_usuario, :v_estado;
 
-    IF (v_presupuesto_usuario IS NULL) THEN
+    IF (v_presupuesto_usuario IS NULL OR v_estado <> 'activo') THEN
         EXCEPTION ex_presupuesto_no_encontrado;
 
-    IF (v_presupuesto_usuario <> p_id_usuario) THEN
-        EXCEPTION ex_presupuesto_usuario;
-
-    IF (v_estado <> 'activo') THEN
-        EXCEPTION ex_presupuesto_estado;
 
     SELECT
         COALESCE(SUM(CASE WHEN tipo = 'ingreso' THEN monto ELSE 0 END), 0),
