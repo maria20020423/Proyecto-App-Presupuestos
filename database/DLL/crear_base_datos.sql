@@ -223,13 +223,15 @@ DECLARE VARIABLE v_monto_ejecutado NUMERIC(15, 2);
 DECLARE VARIABLE v_dia_actual INTEGER;
 DECLARE VARIABLE v_dias_mes INTEGER;
 DECLARE VARIABLE v_proyeccion NUMERIC(15, 2);
+
 BEGIN
+
     IF (FN_VALIDAR_VIGENCIA_PRESUPUESTO(:p_anio, :p_mes, :p_id_presupuesto) = 0) THEN
         RETURN 0;
 
     v_monto_ejecutado = FN_CALCULAR_MONTO_EJECUTADO(:p_id_subcategoria, :p_id_presupuesto, :p_anio, :p_mes);
     v_dia_actual = EXTRACT(DAY FROM CURRENT_DATE);
-    v_dias_mes = EXTRACT(DAY FROM (DATEADD(1 MONTH TO DATEFROMPARTS(:p_anio, :p_mes, 1)) - 1));
+    v_dias_mes = LAST_DAY(OF MONTH FROM CURRENT_DATE);
 
     IF (v_dia_actual <= 0 OR v_dias_mes <= 0) THEN
         RETURN v_monto_ejecutado;
@@ -261,7 +263,7 @@ BEGIN
 
     v_mes = EXTRACT(MONTH FROM CURRENT_DATE);
     v_anio = EXTRACT(YEAR FROM CURRENT_DATE);
-    v_fecha_objetivo = DATEFROMPARTS(:v_anio, :v_mes, :v_dia);
+    v_fecha_objetivo = CAST(v_anio || '-' || v_mes || '-' || v_dia AS DATE);
 
     IF (v_fecha_objetivo < CURRENT_DATE) THEN
     BEGIN
@@ -273,14 +275,14 @@ BEGIN
         ELSE
             v_mes = v_mes + 1;
 
-        v_fecha_objetivo = DATEFROMPARTS(:v_anio, :v_mes, :v_dia);
+        v_fecha_objetivo = CAST(v_anio || '-' || v_mes || '-' || v_dia AS DATE);
     END
 
     IF (v_fecha_objetivo < v_fecha_inicio OR v_fecha_objetivo > v_fecha_fin) THEN
         RETURN NULL;
 
     RETURN DATEDIFF(DAY, CURRENT_DATE, v_fecha_objetivo);
-END#
+END;
 
 
 CREATE FUNCTION FN_OBTENER_BALANCE_SUBCATEGORIA (
@@ -345,18 +347,23 @@ END#
 
 CREATE FUNCTION FN_OBTENER_TOTAL_CATEGORIA_MES (
     p_id_categoria INTEGER,
-    p_id_presupuesto INTEGER
+    p_id_presupuesto INTEGER,
+    p_anio INTEGER,
+    p_mes INTEGER
 )
 RETURNS NUMERIC(15, 2)
 AS
 DECLARE VARIABLE v_total NUMERIC(15, 2);
 BEGIN
+
+    IF (FN_VALIDAR_VIGENCIA_PRESUPUESTO(:p_anio, :p_mes, :p_id_presupuesto) = 0) THEN
+        RETURN 0;
+ 
     SELECT COALESCE(SUM(dp.monto_mensual), 0)
     FROM DETALLE_PRESUPUESTO dp
     INNER JOIN SUBCATEGORIA s ON s.id = dp.subcategoria_id
     WHERE dp.presupuesto_id = :p_id_presupuesto
       AND s.categoria_id = :p_id_categoria
-      AND dp.estado = 'activo'
     INTO :v_total;
 
     RETURN COALESCE(v_total, 0);
@@ -499,17 +506,6 @@ BEGIN
     WHERE id = :p_id_categoria;
 END#
 
-
-CREATE EXCEPTION EX_CATEGORIA_CON_SUBCATEGORIAS 'La categoria tiene subcategorias activas adicionales';
-CREATE EXCEPTION EX_CATEGORIA_NO_DEFAULT 'No existe subcategoria por defecto';
-CREATE EXCEPTION EX_CATEGORIA_NO_ENCONTRADA 'Categoria no encontrada';
-CREATE EXCEPTION EX_SUBCATEGORIA_DEFAULT_EXISTENTE 'Ya existe una subcategoria por defecto';
-CREATE EXCEPTION EX_CATEGORIA_SIN_SUBCATEGORIA 'La categoria debe mantener al menos una subcategoria activa';
-CREATE EXCEPTION EX_SUBCATEGORIA_NO_ENCONTRADA 'Subcategoria no encontrada';
-CREATE EXCEPTION EX_SUBCATEGORIA_DEFAULT_NO_ELIMINAR 'No se puede eliminar la subcategoria por defecto';
-CREATE EXCEPTION EX_SUBCATEGORIA_USADA_DETALLE 'La subcategoria se utiliza en detalle de presupuesto';
-CREATE EXCEPTION EX_SUBCATEGORIA_USADA_TRANSACCION 'La subcategoria se utiliza en transacciones';
-CREATE EXCEPTION EX_PRESUPUESTO_CON_TRANSACCIONES 'No se puede eliminar el presupuesto porque tiene transacciones asociadas';
 
 CREATE PROCEDURE SP_LISTAR_CATEGORIAS (
     p_id_usuario INTEGER,
@@ -1030,7 +1026,7 @@ CREATE PROCEDURE SP_ACTUALIZAR_META_AHORRO (
     p_monto_objetivo NUMERIC(15,2),
     p_monto_acumulado NUMERIC(15,2),
     p_fecha_objetivo DATE,
-    p_estado estado VARCHAR(20),
+    p_estado VARCHAR(20),
     p_prioridad INTEGER,
     p_promedio_ahorro_mensual NUMERIC(15,2),
     p_fecha_inicio DATE,
@@ -1306,10 +1302,11 @@ CREATE PROCEDURE SP_ELIMINAR_PRESUPUESTO (
     id_presupuesto INTEGER
 )
 AS
+DECLARE VARIABLE v_transacciones_asociadas INTEGER;
 BEGIN
-    DECLARE VARIABLE v_transacciones_asociadas INTEGER;
+
     SELECT COUNT(*)
-    FROM TRANSACCION
+    FROM TRANSACCIONES
     WHERE presupuesto_id = :id_presupuesto
     INTO :v_transacciones_asociadas;
 
@@ -1319,23 +1316,6 @@ BEGIN
     DELETE FROM PRESUPUESTO
     WHERE id_presupuesto = :id_presupuesto;
 END#
-
-CREATE EXCEPTION EX_PRESUPUESTO_VIGENCIA 'Periodo de vigencia invalido para el presupuesto';
-CREATE EXCEPTION EX_PRESUPUESTO_TRASLAPADO 'Ya existe un presupuesto activo en el rango seleccionado';
-CREATE EXCEPTION EX_PRESUPUESTO_NO_ENCONTRADO 'Presupuesto no encontrado';
-CREATE EXCEPTION EX_PRESUPUESTO_USUARIO 'El presupuesto no pertenece al usuario indicado';
-CREATE EXCEPTION EX_PRESUPUESTO_ESTADO 'El presupuesto no se encuentra en estado activo';
-CREATE EXCEPTION EX_PRESUPUESTO_FUERA_VIGENCIA 'El periodo indicado esta fuera de la vigencia del presupuesto';
-CREATE EXCEPTION EX_PRESUPUESTO_NO_FINALIZADO 'El presupuesto aun no ha finalizado su vigencia';
-CREATE EXCEPTION EX_TRANSACCION_TIPO_INVALIDO 'Tipo de transaccion invalido';
-CREATE EXCEPTION EX_TRANSACCION_MONTO_INVALIDO 'El monto de la transaccion debe ser mayor que cero';
-CREATE EXCEPTION EX_TRANSACCION_MES_INVALIDO 'El mes indicado para la transaccion no es valido';
-CREATE EXCEPTION EX_TRANSACCION_CATEGORIA_INVALIDA 'La subcategoria no pertenece al usuario o su tipo no coincide';
-CREATE EXCEPTION EX_TRANSACCION_OBLIGACION_INVALIDA 'La obligacion indicada no es valida para la transaccion';
-CREATE EXCEPTION EX_TRANSACCION_FECHA_FUERA_RANGO 'La fecha de la transaccion cae fuera de la vigencia del presupuesto';
-CREATE EXCEPTION EX_OBLIGACION_NO_ENCONTRADA 'Obligacion fija no encontrada';
-CREATE EXCEPTION EX_OBLIGACION_SIN_DETALLE 'La obligacion no tiene detalle configurado en el presupuesto';
-
 
 CREATE PROCEDURE SP_LISTAR_PRESUPUESTOS (p_id_usuario INTEGER, p_estado VARCHAR(20))
 RETURNS (
@@ -1655,7 +1635,7 @@ CREATE OR ALTER PROCEDURE SP_CREAR_PRESUPUESTO_COMPLETO (
     p_id_usuario INTEGER,
     p_nombre VARCHAR(255),
     p_descripcion VARCHAR(500),
-    p_detalles_presupuesto BLOB SUB_TYPE TEXT, -- Recibe el JSON aquí
+    p_detalles_presupuesto BLOB SUB_TYPE TEXT CHARACTER SET UTF8,
     p_anio_inicio INTEGER,
     p_mes_inicio INTEGER,
     p_anio_fin INTEGER,
@@ -1669,78 +1649,16 @@ RETURNS (
     id_presupuesto INTEGER
 )
 AS
-DECLARE VARIABLE v_estado VARCHAR(20);
-DECLARE VARIABLE v_fecha_creacion TIMESTAMP;
-DECLARE VARIABLE v_overlap INTEGER;
 
-DECLARE VARIABLE v_id_subcategoria INTEGER;
-DECLARE VARIABLE v_monto_mensual NUMERIC(15, 2);
-DECLARE VARIABLE v_observaciones VARCHAR(500);
-DECLARE VARIABLE v_id_detalle_gen INTEGER;
 BEGIN
-    v_estado = 'activo';
-    v_fecha_creacion = CURRENT_TIMESTAMP;
-
-
-    IF (p_anio_fin < p_anio_inicio) THEN
-        EXCEPTION ex_presupuesto_vigencia;
-
-    IF (p_anio_fin = p_anio_inicio AND p_mes_fin < p_mes_inicio) THEN
-        EXCEPTION ex_presupuesto_vigencia;
-
-
-    SELECT COUNT(1)
-    FROM PRESUPUESTO
-    WHERE id_usuario = :p_id_usuario
-      AND estado = 'activo'
-      AND ((anio_inicio * 100 + mes_inicio) <= (p_anio_fin * 100 + p_mes_fin))
-      AND ((anio_fin * 100 + mes_fin) >= (p_anio_inicio * 100 + p_mes_inicio))
-    INTO :v_overlap;
-
-    IF (v_overlap > 0) THEN
-        EXCEPTION ex_presupuesto_traslapado;
-
-    INSERT INTO PRESUPUESTO (
-        id_usuario, nombre_presupuesto, anio_inicio, mes_inicio,
-        anio_fin, mes_fin, total_ingresos_planificados,
-        total_gastos_planificados, total_ahorro_planificado,
-        fecha_creacion, estado, creado_en, creado_por
-    ) VALUES (
-        :p_id_usuario, :p_nombre, :p_anio_inicio, :p_mes_inicio,
-        :p_anio_fin, :p_mes_fin, :p_total_ingresos,
-        :p_total_gastos, :p_total_ahorro,
-        :v_fecha_creacion, :v_estado, CURRENT_TIMESTAMP, :p_creado_por
-    )
-    RETURNING id INTO :id_presupuesto;
-
-    FOR SELECT 
-        id_subcategoria, 
-        monto_mensual, 
-        observaciones
-    FROM JSON_TABLE(:p_detalles_presupuesto, '$[*]' 
-        COLUMNS (
-            id_subcategoria INTEGER PATH '$.id_subcategoria',
-            monto_mensual NUMERIC(15, 2) PATH '$.monto_mensual',
-            observaciones VARCHAR(500) PATH '$.observaciones'
-        )
-    ) INTO :v_id_subcategoria, :v_monto_mensual, :v_observaciones
-    DO
-    BEGIN
-        -- Llamada al procedimiento de detalle
-        EXECUTE PROCEDURE SP_INSERTAR_DETALLE_PRESUPUESTO (
-            :id_presupuesto,
-            :v_id_subcategoria,
-            :v_monto_mensual,
-            :v_observaciones,
-            :p_creado_por
-        ) 
-        RETURNING_VALUES :v_id_detalle_gen;
-    END
+  --json BLOB no se puede iterar o manipular internamente solo es un datatype para almacenar datos complejos.
+  --materail audifovisual, texto, docuemntos etc... pero no se puede manipular desde base datos, a no ser que se cuente con versiones como la de oracle.
+  --oracle y otras disricuiones de firebird de pago contien funciones especiales para manejar y parsear, json 
+  -- en la conferencia de berlin de 2019, el tipo json se  volvio uno de los tipos de datos mas pedidos.
 
     SUSPEND;
-END#
+END;
 
-SET TERM ; #
 
 CREATE PROCEDURE SP_OBTENER_RESUMEN_CATEGORIA_MES (
     p_id_categoria INTEGER,

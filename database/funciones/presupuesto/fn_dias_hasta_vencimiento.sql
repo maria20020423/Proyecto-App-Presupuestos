@@ -20,7 +20,7 @@ BEGIN
 
     v_mes = EXTRACT(MONTH FROM CURRENT_DATE);
     v_anio = EXTRACT(YEAR FROM CURRENT_DATE);
-    v_fecha_objetivo = DATEFROMPARTS(:v_anio, :v_mes, :v_dia);
+    v_fecha_objetivo = CAST(v_anio || '-' || v_mes || '-' || v_dia AS DATE);
 
     IF (v_fecha_objetivo < CURRENT_DATE) THEN
     BEGIN
@@ -32,11 +32,11 @@ BEGIN
         ELSE
             v_mes = v_mes + 1;
 
-        v_fecha_objetivo = DATEFROMPARTS(:v_anio, :v_mes, :v_dia);
+        v_fecha_objetivo = CAST(v_anio || '-' || v_mes || '-' || v_dia AS DATE);
     END
 
     IF (v_fecha_objetivo < v_fecha_inicio OR v_fecha_objetivo > v_fecha_fin) THEN
         RETURN NULL;
 
     RETURN DATEDIFF(DAY, CURRENT_DATE, v_fecha_objetivo);
-END#
+END;

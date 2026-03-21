@@ -2,10 +2,11 @@ CREATE PROCEDURE SP_ELIMINAR_PRESUPUESTO (
     id_presupuesto INTEGER
 )
 AS
+DECLARE VARIABLE v_transacciones_asociadas INTEGER;
 BEGIN
-    DECLARE VARIABLE v_transacciones_asociadas INTEGER;
+
     SELECT COUNT(*)
-    FROM TRANSACCION
+    FROM TRANSACCIONES
     WHERE presupuesto_id = :id_presupuesto
     INTO :v_transacciones_asociadas;
 
