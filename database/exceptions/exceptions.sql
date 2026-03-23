@@ -23,3 +23,6 @@ CREATE EXCEPTION EX_TRANSACCION_OBLIGACION_INVALIDA 'La obligacion indicada no e
 CREATE EXCEPTION EX_TRANSACCION_FECHA_FUERA_RANGO 'La fecha de la transaccion cae fuera de la vigencia del presupuesto'#
 CREATE EXCEPTION EX_OBLIGACION_NO_ENCONTRADA 'Obligacion fija no encontrada'#
 CREATE EXCEPTION EX_OBLIGACION_SIN_DETALLE 'La obligacion no tiene detalle configurado en el presupuesto'#
+CREATE EXCEPTION EX_OBLIGACION_SIN_SUBCATEGORIA 'Toda obligacion debe tener una subcategoria asociada'#
+CREATE EXCEPTION EX_OBLIGACION_FECHA_FINAL_INVALIDA 'La fecha de finalizacion debe ser mayor que la fecha de inicio'#
+CREATE EXCEPTION EX_OBLIGACION_SUBCATEGORIA_TIPO_INVALIDO 'Una obligacion fija solo puede estar asociada a subcategorias de categorias de tipo gasto'#
