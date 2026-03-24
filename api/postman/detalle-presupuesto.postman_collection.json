@@ -1,0 +1,60 @@
+{
+  "info": {
+    "_postman_id": "bff96f8c-113e-4c51-8e93-f1cf1d3fa908",
+    "name": "detalle-presupuesto",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "27311090",
+    "_collection_link": "https://go.postman.co/collection/27311090-bff96f8c-113e-4c51-8e93-f1cf1d3fa908?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "get-detalles",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/detalle-presupuesto/presupuesto/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "detalle-presupuesto",
+            "presupuesto",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "New Request",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"presupuesto_id\":1,\r\n    \"subcategoria_id\":1,\r\n    \"monto_mensual\": 300.0,\r\n    \"observaciones\": \"compre  mis medicinas\",\r\n    \"creado_por\": 1\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/detalle-presupuesto",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "detalle-presupuesto"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
