@@ -4,8 +4,9 @@ export interface CreateObligacionFijaDto {
     nombre: string;
     descripcion: string;
     dia_mes_expiracion: number;
+    monto: number;
     is_vigente: boolean;
-    fecha_inicio: string;
-    fecha_final: string;
+    fecha_inicio: string | null;
+    fecha_final: string | null;
     creado_por: number;
 }

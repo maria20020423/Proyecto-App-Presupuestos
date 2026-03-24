@@ -326,7 +326,6 @@ export default function PresupuestosPage() {
                   onChange={(e) => handleInputChange("total_ingresos_planificados", e.target.value)}
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3"
                   min={0}
-                  step={100}
                   required
                 />
               </div>
@@ -338,7 +337,6 @@ export default function PresupuestosPage() {
                   onChange={(e) => handleInputChange("total_gastos_planificados", e.target.value)}
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3"
                   min={0}
-                  step={100}
                   required
                 />
               </div>
@@ -346,11 +344,11 @@ export default function PresupuestosPage() {
                 <label className="text-sm font-medium text-slate-600">Ahorro esperado</label>
                 <input
                   type="number"
+                  step="0.01"
                   value={formData.total_ahorro_planificado}
                   onChange={(e) => handleInputChange("total_ahorro_planificado", e.target.value)}
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3"
                   min={0}
-                  step={100}
                   required
                 />
               </div>

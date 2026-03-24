@@ -1,4 +1,14 @@
-import { LoginDTO, LoginResponseDTO, CreateCategoriaDto, CreateCategoriaResponseDTO, UpdateCategoriaDto, CategoriaListResponse, CreateSubcategoriaDto, CreateSubcategoriaResponseDTO, SubcategoriaListResponse } from "@/types/api";
+import {
+  LoginDTO,
+  LoginResponseDTO,
+  CreateCategoriaDto,
+  CreateCategoriaResponseDTO,
+  UpdateCategoriaDto,
+  CategoriaListResponse,
+  CreateSubcategoriaDto,
+  CreateSubcategoriaResponseDTO,
+  SubcategoriaListResponse,
+} from "@/types/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -65,6 +75,10 @@ export const categoriaService = {
 export const subcategoriaService = {
   async getByCategoria(id_categoria: number): Promise<SubcategoriaListResponse> {
     return fetchApi<SubcategoriaListResponse>(`/subcategorias/categoria/${id_categoria}`);
+  },
+
+  async getById(id_subcategoria: number): Promise<{ message: string; results?: Subcategoria }> {
+    return fetchApi<{ message: string; results?: Subcategoria }>(`/subcategorias/${id_subcategoria}`);
   },
 
   async create(id_usuario: number, subcategoria: CreateSubcategoriaDto, categoriaId: number): Promise<CreateSubcategoriaResponseDTO> {

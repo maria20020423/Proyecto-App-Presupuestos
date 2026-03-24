@@ -6,8 +6,9 @@ import { usePathname } from 'next/navigation';
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: '🏠' },
   { href: '/dashboard/categorias', label: 'Categorías', icon: '📁' },
-  { href: '/dashboard/transacciones', label: 'Transacciones', icon: '💰' },
   { href: '/dashboard/presupuestos', label: 'Presupuestos', icon: '📊' },
+  { href: '/dashboard/metas-ahorro', label: 'Metas de Ahorro', icon: '🎯' },
+  { href: '/dashboard/obligaciones', label: 'Obligaciones Fijas', icon: '📅' },
   { href: '/dashboard/reportes', label: 'Reportes', icon: '📈' },
 ];
 

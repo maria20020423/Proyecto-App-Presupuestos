@@ -5,6 +5,7 @@ export interface GetObligacionFijaResult {
     nombre: string;
     descripcion: string;
     dia_mes_expiracion: number;
+    monto: number;
     is_vigente: boolean;
     fecha_inicio: Date;
     fecha_final: Date;

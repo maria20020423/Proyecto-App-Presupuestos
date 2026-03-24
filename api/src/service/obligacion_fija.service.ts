@@ -54,16 +54,17 @@ export default class ObligacionFijaService {
         try {
             const resultSet = await this.firebird_client.executeQuery(
                 transaction,
-                "SELECT * FROM SP_INSERTAR_OBLIGACION_FIJA (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "SELECT * FROM SP_INSERTAR_OBLIGACION_FIJA (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [
                     obligacion.id_usuario,
                     obligacion.subcategoria_id,
                     obligacion.nombre,
                     obligacion.descripcion,
                     obligacion.dia_mes_expiracion,
+                    obligacion.monto,
                     obligacion.is_vigente,
-                    new Date(obligacion.fecha_inicio),
-                    new Date(obligacion.fecha_final),
+                    obligacion.fecha_inicio ? new Date(obligacion.fecha_inicio) : null,
+                    obligacion.fecha_final ? new Date(obligacion.fecha_final) : null,
                     obligacion.creado_por
                 ]
             );
@@ -85,7 +86,7 @@ export default class ObligacionFijaService {
         try {
             await this.firebird_client.execute(
                 transaction,
-                "EXECUTE PROCEDURE SP_ACTUALIZAR_OBLIGACION_FIJA(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "EXECUTE PROCEDURE SP_ACTUALIZAR_OBLIGACION_FIJA(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [
                     id_obligacion,
                     obligacion.id_usuario,
@@ -93,9 +94,10 @@ export default class ObligacionFijaService {
                     obligacion.nombre,
                     obligacion.descripcion,
                     obligacion.dia_mes_expiracion,
+                    obligacion.monto,
                     obligacion.is_vigente,
-                    new Date(obligacion.fecha_inicio),
-                    new Date(obligacion.fecha_final),
+                    obligacion.fecha_inicio ? new Date(obligacion.fecha_inicio) : null,
+                    obligacion.fecha_final ? new Date(obligacion.fecha_final) : null,
                     obligacion.modificado_por
                 ]
             );

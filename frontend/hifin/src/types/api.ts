@@ -4,6 +4,8 @@ export * from "./dto/subcategoria.types";
 export * from "./dto/presupuesto.types";
 export * from "./dto/detalle-presupuesto.types";
 export * from "./dto/transacciones.types";
+export * from "./dto/obligacion-fija.types";
+export * from "./dto/meta-ahorro.types";
 
 import { ApiResponse } from "./common/common.types";
 
