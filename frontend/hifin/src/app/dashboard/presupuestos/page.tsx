@@ -240,17 +240,6 @@ export default function PresupuestosPage() {
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-600">Descripción</label>
-                <input
-                  type="text"
-                  value={""}
-                  onChange={(e) => console.log("Descripción no es requerida en CreatePresupuestoDto")}
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Objetivo del plan"
-                  disabled
-                />
-              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
