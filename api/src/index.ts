@@ -29,6 +29,13 @@ const PORT = 3000;
 const corsOptions: CorsOptions = {
   origin: "http://localhost:3001"
 };
+app.disable('etag');
+app.use((_req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
 app.use(express.json());
 
 const client=createNativeClient(getDefaultLibraryFilename());
