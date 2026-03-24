@@ -57,6 +57,7 @@ CREATE TABLE OBLIGACION_FIJA (
     subcategoria_id INTEGER NOT NULL, -- FK to SUBCATEGORIA 
     nombre VARCHAR(500) NOT NULL,
     descripcion VARCHAR(500),
+    monto NUMERIC(15,2),
     dia_mes_expiracion INTEGER NOT NULL,
     is_vigente BOOLEAN NOT NULL,
     fecha_inicio DATE NOT NULL,
@@ -146,6 +147,102 @@ CREATE TABLE USUARIO (
 )#
 
 
+
+ALTER TABLE SUBCATEGORIA
+ADD CONSTRAINT FK_SUBCATEGORIA_CATEGORIA
+FOREIGN KEY (categoria_id) REFERENCES CATEGORIA(id)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+ALTER TABLE CATEGORIA
+ADD CONSTRAINT FK_CATEGORIA_USUARIO
+FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+
+ALTER TABLE PRESUPUESTO
+ADD CONSTRAINT FK_PRESUPUESTO_USUARIO
+FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+
+
+ALTER TABLE META_AHORRO
+ADD CONSTRAINT FK_META_AHORRO_USUARIO
+FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+ALTER TABLE DETALLE_PRESUPUESTO
+ADD CONSTRAINT FK_DETALLE_PRESUPUESTO_PRESUPUESTO
+FOREIGN KEY (presupuesto_id) REFERENCES PRESUPUESTO(id_presupuesto)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+ALTER TABLE DETALLE_PRESUPUESTO
+ADD CONSTRAINT FK_DETALLE_PRESUPUESTO_SUBCATEGORIA
+FOREIGN KEY (subcategoria_id) REFERENCES SUBCATEGORIA(id)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+
+ALTER TABLE OBLIGACION_FIJA
+ADD CONSTRAINT FK_OBLIGACION_FIJA_USUARIO
+FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+
+ALTER TABLE OBLIGACION_FIJA
+ADD CONSTRAINT FK_OBLIGACION_FIJA_SUBCATEGORIA
+FOREIGN KEY (subcategoria_id) REFERENCES SUBCATEGORIA(id)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+ALTER TABLE TRANSACCIONES
+ADD CONSTRAINT FK_TRANSACCIONES_USUARIO
+FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+ALTER TABLE TRANSACCIONES
+ADD CONSTRAINT FK_TRANSACCIONES_PRESUPUESTO
+FOREIGN KEY (presupuesto_id) REFERENCES PRESUPUESTO(id_presupuesto)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+ALTER TABLE TRANSACCIONES
+ADD CONSTRAINT FK_TRANSACCIONES_SUBCATEGORIA
+FOREIGN KEY (subcategoria_id) REFERENCES SUBCATEGORIA(id)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+ALTER TABLE TRANSACCIONES
+ADD CONSTRAINT FK_TRANSACCIONES_OBLIGACION_FIJA
+FOREIGN KEY (obligacion_id) REFERENCES OBLIGACION_FIJA(id)
+ON DELETE SET NULL ON UPDATE CASCADE#
+
+
+CREATE EXCEPTION EX_CATEGORIA_CON_SUBCATEGORIAS 'La categoria tiene subcategorias activas adicionales'#
+CREATE EXCEPTION EX_CATEGORIA_NO_DEFAULT 'No existe subcategoria por defecto'#
+CREATE EXCEPTION EX_CATEGORIA_NO_ENCONTRADA 'Categoria no encontrada'#
+CREATE EXCEPTION EX_SUBCATEGORIA_DEFAULT_EXISTENTE 'Ya existe una subcategoria por defecto'#
+CREATE EXCEPTION EX_CATEGORIA_SIN_SUBCATEGORIA 'La categoria debe mantener al menos una subcategoria activa'#
+CREATE EXCEPTION EX_SUBCATEGORIA_NO_ENCONTRADA 'Subcategoria no encontrada'#
+CREATE EXCEPTION EX_SUBCATEGORIA_DEFAULT_NO_ELIMINAR 'No se puede eliminar la subcategoria por defecto'#
+CREATE EXCEPTION EX_SUBCATEGORIA_USADA_DETALLE 'La subcategoria se utiliza en detalle de presupuesto'#
+CREATE EXCEPTION EX_SUBCATEGORIA_USADA_TRANSACCION 'La subcategoria se utiliza en transacciones'#
+CREATE EXCEPTION EX_PRESUPUESTO_CON_TRANSACCIONES 'No se puede eliminar el presupuesto porque tiene transacciones asociadas'#
+CREATE EXCEPTION EX_PRESUPUESTO_VIGENCIA 'Periodo de vigencia invalido para el presupuesto'#
+CREATE EXCEPTION EX_PRESUPUESTO_TRASLAPADO 'Ya existe un presupuesto activo en el rango seleccionado'#
+CREATE EXCEPTION EX_PRESUPUESTO_NO_ENCONTRADO 'Presupuesto no encontrado'#
+CREATE EXCEPTION EX_PRESUPUESTO_USUARIO 'El presupuesto no pertenece al usuario indicado'#
+CREATE EXCEPTION EX_PRESUPUESTO_ESTADO 'El presupuesto no se encuentra en estado activo'#
+CREATE EXCEPTION EX_PRESUPUESTO_FUERA_VIGENCIA 'El periodo indicado esta fuera de la vigencia del presupuesto'#
+CREATE EXCEPTION EX_PRESUPUESTO_NO_FINALIZADO 'El presupuesto aun no ha finalizado su vigencia'#
+CREATE EXCEPTION EX_TRANSACCION_TIPO_INVALIDO 'Tipo de transaccion invalido'#
+CREATE EXCEPTION EX_TRANSACCION_MONTO_INVALIDO 'El monto de la transaccion debe ser mayor que cero'#
+CREATE EXCEPTION EX_TRANSACCION_MES_INVALIDO 'El mes indicado para la transaccion no es valido'#
+CREATE EXCEPTION EX_TRANSACCION_CATEGORIA_INVALIDA 'La subcategoria no pertenece al usuario o su tipo no coincide'#
+CREATE EXCEPTION EX_TRANSACCION_OBLIGACION_INVALIDA 'La obligacion indicada no es valida para la transaccion'#
+CREATE EXCEPTION EX_TRANSACCION_FECHA_FUERA_RANGO 'La fecha de la transaccion cae fuera de la vigencia del presupuesto'#
+CREATE EXCEPTION EX_OBLIGACION_NO_ENCONTRADA 'Obligacion fija no encontrada'#
+CREATE EXCEPTION EX_OBLIGACION_SIN_DETALLE 'La obligacion no tiene detalle configurado en el presupuesto'#
+CREATE EXCEPTION EX_OBLIGACION_SIN_SUBCATEGORIA 'Toda obligacion debe tener una subcategoria asociada'#
+CREATE EXCEPTION EX_OBLIGACION_FECHA_FINAL_INVALIDA 'La fecha de finalizacion debe ser mayor que la fecha de inicio'#
+CREATE EXCEPTION EX_OBLIGACION_SUBCATEGORIA_TIPO_INVALIDO 'Una obligacion fija solo puede estar asociada a subcategorias de categorias de tipo gasto'#
+
 CREATE FUNCTION FN_CALCULAR_MONTO_EJECUTADO (
     p_id_subcategoria INTEGER,
     p_id_presupuesto INTEGER,
@@ -222,13 +319,15 @@ DECLARE VARIABLE v_monto_ejecutado NUMERIC(15, 2);
 DECLARE VARIABLE v_dia_actual INTEGER;
 DECLARE VARIABLE v_dias_mes INTEGER;
 DECLARE VARIABLE v_proyeccion NUMERIC(15, 2);
+
 BEGIN
+
     IF (FN_VALIDAR_VIGENCIA_PRESUPUESTO(:p_anio, :p_mes, :p_id_presupuesto) = 0) THEN
         RETURN 0;
 
     v_monto_ejecutado = FN_CALCULAR_MONTO_EJECUTADO(:p_id_subcategoria, :p_id_presupuesto, :p_anio, :p_mes);
     v_dia_actual = EXTRACT(DAY FROM CURRENT_DATE);
-    v_dias_mes = EXTRACT(DAY FROM (DATEADD(1 MONTH TO DATEFROMPARTS(:p_anio, :p_mes, 1)) - 1));
+    v_dias_mes = LAST_DAY(OF MONTH FROM CURRENT_DATE);
 
     IF (v_dia_actual <= 0 OR v_dias_mes <= 0) THEN
         RETURN v_monto_ejecutado;
@@ -260,7 +359,7 @@ BEGIN
 
     v_mes = EXTRACT(MONTH FROM CURRENT_DATE);
     v_anio = EXTRACT(YEAR FROM CURRENT_DATE);
-    v_fecha_objetivo = DATEFROMPARTS(:v_anio, :v_mes, :v_dia);
+    v_fecha_objetivo = CAST(v_anio || '-' || v_mes || '-' || v_dia AS DATE);
 
     IF (v_fecha_objetivo < CURRENT_DATE) THEN
     BEGIN
@@ -272,14 +371,14 @@ BEGIN
         ELSE
             v_mes = v_mes + 1;
 
-        v_fecha_objetivo = DATEFROMPARTS(:v_anio, :v_mes, :v_dia);
+        v_fecha_objetivo = CAST(v_anio || '-' || v_mes || '-' || v_dia AS DATE);
     END
 
     IF (v_fecha_objetivo < v_fecha_inicio OR v_fecha_objetivo > v_fecha_fin) THEN
         RETURN NULL;
 
     RETURN DATEDIFF(DAY, CURRENT_DATE, v_fecha_objetivo);
-END#
+END;
 
 
 CREATE FUNCTION FN_OBTENER_BALANCE_SUBCATEGORIA (
@@ -344,18 +443,23 @@ END#
 
 CREATE FUNCTION FN_OBTENER_TOTAL_CATEGORIA_MES (
     p_id_categoria INTEGER,
-    p_id_presupuesto INTEGER
+    p_id_presupuesto INTEGER,
+    p_anio INTEGER,
+    p_mes INTEGER
 )
 RETURNS NUMERIC(15, 2)
 AS
 DECLARE VARIABLE v_total NUMERIC(15, 2);
 BEGIN
+
+    IF (FN_VALIDAR_VIGENCIA_PRESUPUESTO(:p_anio, :p_mes, :p_id_presupuesto) = 0) THEN
+        RETURN 0;
+ 
     SELECT COALESCE(SUM(dp.monto_mensual), 0)
     FROM DETALLE_PRESUPUESTO dp
     INNER JOIN SUBCATEGORIA s ON s.id = dp.subcategoria_id
     WHERE dp.presupuesto_id = :p_id_presupuesto
       AND s.categoria_id = :p_id_categoria
-      AND dp.estado = 'activo'
     INTO :v_total;
 
     RETURN COALESCE(v_total, 0);
@@ -497,17 +601,6 @@ BEGIN
         modificado_en = CURRENT_TIMESTAMP
     WHERE id = :p_id_categoria;
 END#
-
-
-CREATE EXCEPTION EX_CATEGORIA_CON_SUBCATEGORIAS 'La categoria tiene subcategorias activas adicionales';
-CREATE EXCEPTION EX_CATEGORIA_NO_DEFAULT 'No existe subcategoria por defecto';
-CREATE EXCEPTION EX_CATEGORIA_NO_ENCONTRADA 'Categoria no encontrada';
-CREATE EXCEPTION EX_SUBCATEGORIA_DEFAULT_EXISTENTE 'Ya existe una subcategoria por defecto';
-CREATE EXCEPTION EX_CATEGORIA_SIN_SUBCATEGORIA 'La categoria debe mantener al menos una subcategoria activa';
-CREATE EXCEPTION EX_SUBCATEGORIA_NO_ENCONTRADA 'Subcategoria no encontrada';
-CREATE EXCEPTION EX_SUBCATEGORIA_DEFAULT_NO_ELIMINAR 'No se puede eliminar la subcategoria por defecto';
-CREATE EXCEPTION EX_SUBCATEGORIA_USADA_DETALLE 'La subcategoria se utiliza en detalle de presupuesto';
-CREATE EXCEPTION EX_SUBCATEGORIA_USADA_TRANSACCION 'La subcategoria se utiliza en transacciones';
 
 
 CREATE PROCEDURE SP_LISTAR_CATEGORIAS (
@@ -1029,7 +1122,7 @@ CREATE PROCEDURE SP_ACTUALIZAR_META_AHORRO (
     p_monto_objetivo NUMERIC(15,2),
     p_monto_acumulado NUMERIC(15,2),
     p_fecha_objetivo DATE,
-    p_estado estado VARCHAR(20),
+    p_estado VARCHAR(20),
     p_prioridad INTEGER,
     p_promedio_ahorro_mensual NUMERIC(15,2),
     p_fecha_inicio DATE,
@@ -1056,13 +1149,13 @@ BEGIN
 END#
 
 
-
 CREATE PROCEDURE SP_INSERTAR_OBLIGACION_FIJA (
     p_id_usuario INTEGER,
     p_subcategoria_id INTEGER,
     p_nombre VARCHAR(500),
     p_descripcion VARCHAR(500),
     p_dia_mes_expiracion INTEGER,
+    p_monto NUMERIC(15,2),
     p_is_vigente BOOLEAN,
     p_fecha_inicio DATE,
     p_fecha_final DATE,
@@ -1072,13 +1165,32 @@ RETURNS (
     id_obligacion_fija INTEGER
 )
 AS
+DECLARE VARIABLE v_categoria_tipo VARCHAR(20);
 BEGIN
+
+    
+    
+    SELECT c.tipo_categoria
+    FROM SUBCATEGORIA s
+    JOIN CATEGORIA c ON s.categoria_id = c.id
+    WHERE s.id = :p_subcategoria_id
+    INTO :v_categoria_tipo;
+    
+    IF (:v_categoria_tipo <> 'gasto') THEN
+        EXCEPTION EX_OBLIGACION_SUBCATEGORIA_TIPO_INVALIDO;
+    
+
+    IF (:p_fecha_final IS NOT NULL) THEN
+        IF (:p_fecha_final <= :p_fecha_inicio) THEN
+            EXCEPTION EX_OBLIGACION_FECHA_FINAL_INVALIDA;
+            
     INSERT INTO OBLIGACION_FIJA (
         id_usuario,
         subcategoria_id,
         nombre,
         descripcion,
         dia_mes_expiracion,
+        monto,
         is_vigente,
         fecha_inicio,
         fecha_final,
@@ -1091,6 +1203,7 @@ BEGIN
         :p_nombre,
         :p_descripcion,
         :p_dia_mes_expiracion,
+        :p_monto,
         :p_is_vigente,
         :p_fecha_inicio,
         :p_fecha_final,
@@ -1107,13 +1220,16 @@ CREATE PROCEDURE SP_ELIMINAR_OBLIGACION_FIJA (
 AS
 BEGIN
     UPDATE OBLIGACION_FIJA
-    SET estado = 'inactivo',
+    SET is_vigente = FALSE,
         modificado_en = CURRENT_TIMESTAMP
     WHERE id = :p_id_obligacion_fija;
 END#
 
 
-CREATE PROCEDURE SP_LISTAR_OBLIGACION_FIJA
+CREATE PROCEDURE SP_LISTAR_OBLIGACION_FIJA (
+    p_id_usuario INTEGER,
+    p_is_vigente BOOLEAN
+)
 RETURNS (
     id INTEGER,
     id_usuario INTEGER,
@@ -1121,6 +1237,7 @@ RETURNS (
     nombre VARCHAR(500),
     descripcion VARCHAR(500),
     dia_mes_expiracion INTEGER,
+    monto NUMERIC(15,2),
     is_vigente BOOLEAN,
     fecha_inicio DATE,
     fecha_final DATE,
@@ -1138,6 +1255,7 @@ BEGIN
         nombre,
         descripcion,
         dia_mes_expiracion,
+        monto,
         is_vigente,
         fecha_inicio,
         fecha_final,
@@ -1146,6 +1264,8 @@ BEGIN
         creado_por,
         modificado_por
     FROM OBLIGACION_FIJA
+    WHERE id_usuario = COALESCE(:p_id_usuario, id_usuario)
+      AND is_vigente = COALESCE(:p_is_vigente, is_vigente)
     INTO 
         :id,
         :id_usuario,
@@ -1153,6 +1273,7 @@ BEGIN
         :nombre,
         :descripcion,
         :dia_mes_expiracion,
+        :monto,
         :is_vigente,
         :fecha_inicio,
         :fecha_final,
@@ -1176,6 +1297,7 @@ RETURNS (
     nombre VARCHAR(500),
     descripcion VARCHAR(500),
     dia_mes_expiracion INTEGER,
+    monto NUMERIC(15,2),
     is_vigente BOOLEAN,
     fecha_inicio DATE,
     fecha_final DATE,
@@ -1193,6 +1315,7 @@ BEGIN
         nombre,
         descripcion,
         dia_mes_expiracion,
+        monto,
         is_vigente,
         fecha_inicio,
         fecha_final,
@@ -1209,6 +1332,7 @@ BEGIN
         :nombre,
         :descripcion,
         :dia_mes_expiracion,
+        :monto,
         :is_vigente,
         :fecha_inicio,
         :fecha_final,
@@ -1221,6 +1345,7 @@ BEGIN
 END#
 
 
+
 CREATE PROCEDURE SP_ACTUALIZAR_OBLIGACION_FIJA (
     p_id_obligacion_fija INTEGER,
     p_id_usuario INTEGER,
@@ -1228,19 +1353,42 @@ CREATE PROCEDURE SP_ACTUALIZAR_OBLIGACION_FIJA (
     p_nombre VARCHAR(500),
     p_descripcion VARCHAR(500),
     p_dia_mes_expiracion INTEGER,
+    p_monto NUMERIC(15,2),
     p_is_vigente BOOLEAN,
     p_fecha_inicio DATE,
     p_fecha_final DATE,
     p_modificado_por INTEGER
 )
 AS
+DECLARE VARIABLE v_categoria_tipo VARCHAR(20);
+
+
 BEGIN
+
+    if (p_subcategoria_id IS NULL) THEN 
+        EXCEPTION EX_OBLIGACION_SIN_SUBCATEGORIA;
+
+
+    SELECT c.tipo_categoria
+    FROM SUBCATEGORIA s
+    INNER JOIN CATEGORIA c ON s.categoria_id = c.id
+    WHERE s.id = :p_subcategoria_id
+    INTO :v_categoria_tipo;
+    
+    IF (:v_categoria_tipo <> 'gasto') THEN
+        EXCEPTION EX_OBLIGACION_SUBCATEGORIA_TIPO_INVALIDO;
+    
+    IF (:p_fecha_final IS NOT NULL) THEN
+        IF (:p_fecha_final <= :p_fecha_inicio) THEN
+            EXCEPTION EX_OBLIGACION_FECHA_FINAL_INVALIDA;
+    
     UPDATE OBLIGACION_FIJA
     SET id_usuario = :p_id_usuario,
         subcategoria_id = :p_subcategoria_id,
         nombre = :p_nombre,
         descripcion = :p_descripcion,
         dia_mes_expiracion = :p_dia_mes_expiracion,
+        monto= :p_monto,
         is_vigente = :p_is_vigente,
         fecha_inicio = :p_fecha_inicio,
         fecha_final = :p_fecha_final,
@@ -1249,7 +1397,6 @@ BEGIN
     WHERE id = :p_id_obligacion_fija;
 END#
 
-
 CREATE PROCEDURE SP_INSERTAR_PRESUPUESTO (
     id_usuario INTEGER,
     nombre_presupuesto VARCHAR(255),
@@ -1257,59 +1404,79 @@ CREATE PROCEDURE SP_INSERTAR_PRESUPUESTO (
     mes_inicio INTEGER,
     anio_fin INTEGER,
     mes_fin INTEGER,
-    total_ingresos_planificados NUMERIC(15,2),
-    total_gastos_planificados NUMERIC(15,2),
-    total_ahorro_planificado NUMERIC(15,2),
+    total_ingresos_planificados NUMERIC(15, 2),
+    total_gastos_planificados NUMERIC(15, 2),
+    total_ahorro_planificado NUMERIC(15, 2),
     fecha_creacion TIMESTAMP,
     estado VARCHAR(20),
     creado_en TIMESTAMP,
     creado_por INTEGER
-)
-RETURNS (
-    nuevo_id_presupuesto INTEGER
-)
-AS
-BEGIN
-    INSERT INTO PRESUPUESTO (
-        id_usuario, nombre_presupuesto, anio_inicio, mes_inicio, anio_fin, mes_fin,
-        total_ingresos_planificados, total_gastos_planificados, total_ahorro_planificado,
-        fecha_creacion, estado, creado_en, creado_por
-    )
-    VALUES (
-        :id_usuario, :nombre_presupuesto, :anio_inicio, :mes_inicio, :anio_fin, :mes_fin,
-        :total_ingresos_planificados, :total_gastos_planificados, :total_ahorro_planificado,
-        :fecha_creacion, :estado, :creado_en, :creado_por
-    )
-    RETURNING id_presupuesto INTO nuevo_id_presupuesto;
-    SUSPEND;
-END#
+) RETURNS (nuevo_id_presupuesto INTEGER) AS
+DECLARE VARIABLE v_overlap INTEGER;
 
+BEGIN 
+SELECT COUNT(*)
+FROM PRESUPUESTO
+WHERE id_usuario = :id_usuario
+    AND estado = 'activo'
+
+    AND (anio_inicio * 100 + mes_inicio) <= (:anio_fin * 100 + :mes_fin)
+    AND (anio_fin * 100 + mes_fin) >= (:anio_inicio * 100 + :mes_inicio) INTO :v_overlap;
+
+IF (:v_overlap > 0) THEN EXCEPTION EX_PRESUPUESTO_TRASLAPADO;
+
+INSERT INTO PRESUPUESTO (
+        id_usuario,
+        nombre_presupuesto,
+        anio_inicio,
+        mes_inicio,
+        anio_fin,
+        mes_fin,
+        total_ingresos_planificados,
+        total_gastos_planificados,
+        total_ahorro_planificado,
+        fecha_creacion,
+        estado,
+        creado_en,
+        creado_por
+    )
+VALUES (
+        :id_usuario,
+        :nombre_presupuesto,
+        :anio_inicio,
+        :mes_inicio,
+        :anio_fin,
+        :mes_fin,
+        :total_ingresos_planificados,
+        :total_gastos_planificados,
+        :total_ahorro_planificado,
+        :fecha_creacion,
+        :estado,
+        :creado_en,
+        :creado_por
+    )
+RETURNING id_presupuesto INTO nuevo_id_presupuesto;
+SUSPEND;
+END #
 
 CREATE PROCEDURE SP_ELIMINAR_PRESUPUESTO (
     id_presupuesto INTEGER
 )
 AS
+DECLARE VARIABLE v_transacciones_asociadas INTEGER;
 BEGIN
+
+    SELECT COUNT(*)
+    FROM TRANSACCIONES
+    WHERE presupuesto_id = :id_presupuesto
+    INTO :v_transacciones_asociadas;
+
+    IF (v_transacciones_asociadas > 0) THEN
+        EXCEPTION ex_presupuesto_con_transacciones;
+
     DELETE FROM PRESUPUESTO
     WHERE id_presupuesto = :id_presupuesto;
 END#
-
-CREATE EXCEPTION EX_PRESUPUESTO_VIGENCIA 'Periodo de vigencia invalido para el presupuesto';
-CREATE EXCEPTION EX_PRESUPUESTO_TRASLAPADO 'Ya existe un presupuesto activo en el rango seleccionado';
-CREATE EXCEPTION EX_PRESUPUESTO_NO_ENCONTRADO 'Presupuesto no encontrado';
-CREATE EXCEPTION EX_PRESUPUESTO_USUARIO 'El presupuesto no pertenece al usuario indicado';
-CREATE EXCEPTION EX_PRESUPUESTO_ESTADO 'El presupuesto no se encuentra en estado activo';
-CREATE EXCEPTION EX_PRESUPUESTO_FUERA_VIGENCIA 'El periodo indicado esta fuera de la vigencia del presupuesto';
-CREATE EXCEPTION EX_PRESUPUESTO_NO_FINALIZADO 'El presupuesto aun no ha finalizado su vigencia';
-CREATE EXCEPTION EX_TRANSACCION_TIPO_INVALIDO 'Tipo de transaccion invalido';
-CREATE EXCEPTION EX_TRANSACCION_MONTO_INVALIDO 'El monto de la transaccion debe ser mayor que cero';
-CREATE EXCEPTION EX_TRANSACCION_MES_INVALIDO 'El mes indicado para la transaccion no es valido';
-CREATE EXCEPTION EX_TRANSACCION_CATEGORIA_INVALIDA 'La subcategoria no pertenece al usuario o su tipo no coincide';
-CREATE EXCEPTION EX_TRANSACCION_OBLIGACION_INVALIDA 'La obligacion indicada no es valida para la transaccion';
-CREATE EXCEPTION EX_TRANSACCION_FECHA_FUERA_RANGO 'La fecha de la transaccion cae fuera de la vigencia del presupuesto';
-CREATE EXCEPTION EX_OBLIGACION_NO_ENCONTRADA 'Obligacion fija no encontrada';
-CREATE EXCEPTION EX_OBLIGACION_SIN_DETALLE 'La obligacion no tiene detalle configurado en el presupuesto';
-
 
 CREATE PROCEDURE SP_LISTAR_PRESUPUESTOS (p_id_usuario INTEGER, p_estado VARCHAR(20))
 RETURNS (
@@ -1351,7 +1518,7 @@ END#
 
 
 CREATE PROCEDURE SP_CONSULTAR_PRESUPUESTO (
-    id_presupuesto INTEGER
+    p_id_presupuesto INTEGER
 )
 RETURNS (
     id_presupuesto INTEGER,
@@ -1378,7 +1545,7 @@ BEGIN
         total_ingresos_planificados, total_gastos_planificados, total_ahorro_planificado,
         fecha_creacion, estado, creado_en, modificado_en, creado_por, modificado_por
     FROM PRESUPUESTO
-    WHERE id_presupuesto = :id_presupuesto
+    WHERE id_presupuesto = :p_id_presupuesto
     INTO 
         :id_presupuesto, :id_usuario, :nombre_presupuesto, :anio_inicio, :mes_inicio, :anio_fin, :mes_fin,
         :total_ingresos_planificados, :total_gastos_planificados, :total_ahorro_planificado,
@@ -1414,14 +1581,9 @@ BEGIN
     WHERE id_presupuesto = :p_id_presupuesto
     INTO :v_presupuesto_usuario, :v_estado;
 
-    IF (v_presupuesto_usuario IS NULL) THEN
+    IF (v_presupuesto_usuario IS NULL OR v_estado <> 'activo') THEN
         EXCEPTION ex_presupuesto_no_encontrado;
 
-    IF (v_presupuesto_usuario <> p_id_usuario) THEN
-        EXCEPTION ex_presupuesto_usuario;
-
-    IF (v_estado <> 'activo') THEN
-        EXCEPTION ex_presupuesto_estado;
 
     SELECT
         COALESCE(SUM(CASE WHEN tipo = 'ingreso' THEN monto ELSE 0 END), 0),
@@ -1470,6 +1632,101 @@ AS
 BEGIN
     porcentaje = FN_CALCULAR_PORCENTAJE_EJECUTADO(:p_id_subcategoria, :p_id_presupuesto, :p_anio, :p_mes);
     SUSPEND;
+END#
+
+
+CREATE PROCEDURE SP_CALCULAR_TOTALES_PRESUPUESTO_PERIODO (
+    p_id_usuario INTEGER,
+    p_id_presupuesto INTEGER,
+    p_anio_inicio INTEGER,
+    p_mes_inicio INTEGER,
+    p_anio_fin INTEGER,
+    p_mes_fin INTEGER
+)
+RETURNS (
+    anio INTEGER,
+    mes INTEGER,
+    mes_nombre VARCHAR(20),
+    total_ingresos NUMERIC(15, 2),
+    total_gastos NUMERIC(15, 2),
+    total_ahorros NUMERIC(15, 2),
+    balance_final NUMERIC(15, 2)
+)
+AS
+DECLARE VARIABLE v_presupuesto_usuario INTEGER;
+DECLARE VARIABLE v_estado VARCHAR(20);
+DECLARE VARIABLE v_current_anio INTEGER;
+DECLARE VARIABLE v_current_mes INTEGER;
+DECLARE VARIABLE v_clave_actual INTEGER;
+DECLARE VARIABLE v_clave_fin INTEGER;
+DECLARE VARIABLE v_total_ing NUMERIC(15, 2);
+DECLARE VARIABLE v_total_gas NUMERIC(15, 2);
+DECLARE VARIABLE v_total_aho NUMERIC(15, 2);
+BEGIN
+
+    SELECT id_usuario, estado
+    FROM PRESUPUESTO
+    WHERE id_presupuesto = :p_id_presupuesto
+    INTO :v_presupuesto_usuario, :v_estado;
+
+    IF (v_presupuesto_usuario IS NULL) THEN
+        EXCEPTION ex_presupuesto_no_encontrado;
+
+    IF (v_presupuesto_usuario <> p_id_usuario) THEN
+        EXCEPTION ex_presupuesto_usuario;
+
+    v_current_anio = :p_anio_inicio;
+    v_current_mes = :p_mes_inicio;
+    v_clave_fin = :p_anio_fin * 100 + :p_mes_fin;
+
+    WHILE (v_current_anio * 100 + v_current_mes <= v_clave_fin) DO
+    BEGIN
+
+        SELECT
+            COALESCE(SUM(CASE WHEN tipo = 'ingreso' THEN monto ELSE 0 END), 0),
+            COALESCE(SUM(CASE WHEN tipo = 'gasto' THEN monto ELSE 0 END), 0),
+            COALESCE(SUM(CASE WHEN tipo = 'ahorro' THEN monto ELSE 0 END), 0)
+        FROM TRANSACCIONES
+        WHERE id_usuario = :p_id_usuario
+          AND presupuesto_id = :p_id_presupuesto
+          AND anio = :v_current_anio
+          AND mes = :v_current_mes
+          AND estado = 'activo'
+        INTO :v_total_ing, :v_total_gas, :v_total_aho;
+
+        -- Asignar valores a los campos de retorno
+        anio = :v_current_anio;
+        mes = :v_current_mes;
+        total_ingresos = :v_total_ing;
+        total_gastos = :v_total_gas;
+        total_ahorros = :v_total_aho;
+        balance_final = :v_total_ing - :v_total_gas - :v_total_aho;
+
+        -- Asignar nombre del mes
+        IF (v_current_mes = 1) THEN mes_nombre = 'Enero';
+        ELSE IF (v_current_mes = 2) THEN mes_nombre = 'Febrero';
+        ELSE IF (v_current_mes = 3) THEN mes_nombre = 'Marzo';
+        ELSE IF (v_current_mes = 4) THEN mes_nombre = 'Abril';
+        ELSE IF (v_current_mes = 5) THEN mes_nombre = 'Mayo';
+        ELSE IF (v_current_mes = 6) THEN mes_nombre = 'Junio';
+        ELSE IF (v_current_mes = 7) THEN mes_nombre = 'Julio';
+        ELSE IF (v_current_mes = 8) THEN mes_nombre = 'Agosto';
+        ELSE IF (v_current_mes = 9) THEN mes_nombre = 'Septiembre';
+        ELSE IF (v_current_mes = 10) THEN mes_nombre = 'Octubre';
+        ELSE IF (v_current_mes = 11) THEN mes_nombre = 'Noviembre';
+        ELSE mes_nombre = 'Diciembre';
+
+        SUSPEND;
+
+        -- Avanzar al siguiente mes
+        IF (v_current_mes = 12) THEN
+        BEGIN
+            v_current_anio = v_current_anio + 1;
+            v_current_mes = 1;
+        END
+        ELSE
+            v_current_mes = v_current_mes + 1;
+    END
 END#
 
 
@@ -1535,10 +1792,11 @@ BEGIN
 END#
 
 
-CREATE PROCEDURE SP_CREAR_PRESUPUESTO_COMPLETO (
+CREATE OR ALTER PROCEDURE SP_CREAR_PRESUPUESTO_COMPLETO (
     p_id_usuario INTEGER,
     p_nombre VARCHAR(255),
     p_descripcion VARCHAR(500),
+    p_detalles_presupuesto BLOB SUB_TYPE TEXT CHARACTER SET UTF8,
     p_anio_inicio INTEGER,
     p_mes_inicio INTEGER,
     p_anio_fin INTEGER,
@@ -1552,63 +1810,15 @@ RETURNS (
     id_presupuesto INTEGER
 )
 AS
-DECLARE VARIABLE v_estado VARCHAR(20);
-DECLARE VARIABLE v_fecha_creacion TIMESTAMP;
-DECLARE VARIABLE v_overlap INTEGER;
+
 BEGIN
-    v_estado = 'activo';
-    v_fecha_creacion = CURRENT_TIMESTAMP;
-
-    IF (p_anio_fin < p_anio_inicio) THEN
-        EXCEPTION ex_presupuesto_vigencia;
-
-    IF (p_anio_fin = p_anio_inicio AND p_mes_fin < p_mes_inicio) THEN
-        EXCEPTION ex_presupuesto_vigencia;
-
-    SELECT COUNT(1)
-    FROM PRESUPUESTO
-    WHERE id_usuario = :p_id_usuario
-      AND estado = 'activo'
-      AND ((anio_inicio * 100 + mes_inicio) <= (p_anio_fin * 100 + p_mes_fin))
-      AND ((anio_fin * 100 + mes_fin) >= (p_anio_inicio * 100 + p_mes_inicio))
-    INTO :v_overlap;
-
-    IF (v_overlap > 0) THEN
-        EXCEPTION ex_presupuesto_traslapado;
-
-    INSERT INTO PRESUPUESTO (
-        id_usuario,
-        nombre_presupuesto,
-        anio_inicio,
-        mes_inicio,
-        anio_fin,
-        mes_fin,
-        total_ingresos_planificados,
-        total_gastos_planificados,
-        total_ahorro_planificado,
-        fecha_creacion,
-        estado,
-        creado_en,
-        creado_por
-    ) VALUES (
-        :p_id_usuario,
-        :p_nombre,
-        :p_anio_inicio,
-        :p_mes_inicio,
-        :p_anio_fin,
-        :p_mes_fin,
-        :p_total_ingresos,
-        :p_total_gastos,
-        :p_total_ahorro,
-        :v_fecha_creacion,
-        :v_estado,
-        CURRENT_TIMESTAMP,
-        :p_creado_por
-    )
-    RETURNING id_presupuesto INTO :id_presupuesto;
+  --json BLOB no se puede iterar o manipular internamente solo es un datatype para almacenar datos complejos.
+  --materail audifovisual, texto, docuemntos etc... pero no se puede manipular desde base datos, a no ser que se cuente con versiones como la de oracle.
+  --oracle y otras disricuiones de firebird de pago contien funciones especiales para manejar y parsear, json 
+  -- en la conferencia de berlin de 2019, el tipo json se  volvio uno de los tipos de datos mas pedidos.
 
     SUSPEND;
-END#
+END;
 
 
 CREATE PROCEDURE SP_OBTENER_RESUMEN_CATEGORIA_MES (
@@ -2215,7 +2425,7 @@ BEGIN
     )
     RETURNING id INTO id_transacciones;
     SUSPEND;
-END
+END#
 
 
 -- SP_ELIMINAR_TRANSACCIONES
@@ -2234,9 +2444,12 @@ BEGIN
 END#
 
 
--- SP_LISTAR_TRANSACCIONES
--- Devuelve todos los registros de la tabla TRANSACCIONES.
-CREATE PROCEDURE SP_LISTAR_TRANSACCIONES
+CREATE PROCEDURE SP_LISTAR_TRANSACCIONES_PRESUPUESTO (
+    p_id_presupuesto INTEGER,
+    p_anio INTEGER,
+    p_mes INTEGER,
+    p_tipo VARCHAR(20)
+)
 RETURNS (
     id INTEGER,
     id_usuario INTEGER,
@@ -2261,50 +2474,27 @@ RETURNS (
 AS
 BEGIN
     FOR SELECT 
-        id,
-        id_usuario,
-        presupuesto_id,
-        anio,
-        mes,
-        subcategoria_id,
-        obligacion_id,
-        tipo,
-        descripcion,
-        monto,
-        fecha,
-        metodo_pago,
-        no_factura,
-        observaciones,
-        estado,
-        creado_en,
-        modificado_en,
-        creado_por,
-        modificado_por
+        id, id_usuario, presupuesto_id, anio, mes, 
+        subcategoria_id, obligacion_id, tipo, descripcion, 
+        monto, fecha, metodo_pago, no_factura, observaciones, 
+        estado, creado_en, modificado_en, creado_por, modificado_por
     FROM TRANSACCIONES
+    WHERE presupuesto_id = COALESCE(:p_id_presupuesto, presupuesto_id)
+      AND anio = COALESCE(:p_anio, anio)
+      AND mes = COALESCE(:p_mes, mes)
+      AND tipo = COALESCE(:p_tipo, tipo)
     INTO 
-        :id,
-        :id_usuario,
-        :presupuesto_id,
-        :anio,
-        :mes,
-        :subcategoria_id,
-        :obligacion_id,
-        :descripcion,
-        :monto,
-        :fecha,
-        :no_factura,
-        :creado_en,
-        :modificado_en,
-        :creado_por,
-        :modificado_por
+        :id, :id_usuario, :presupuesto_id, :anio, :mes, 
+        :subcategoria_id, :obligacion_id, :tipo, :descripcion, 
+        :monto, :fecha, :metodo_pago, :no_factura, :observaciones, 
+        :estado, :creado_en, :modificado_en, :creado_por, :modificado_por
     DO
+    BEGIN
         SUSPEND;
-END
+    END
+END#
 
-
--- SP_CONSULTAR_TRANSACCIONES
--- Devuelve un único registro de la tabla TRANSACCIONES según su id.
-CREATE PROCEDURE SP_CONSULTAR_TRANSACCIONES (
+CREATE OR ALTER PROCEDURE SP_CONSULTAR_TRANSACCIONES (
     p_id_transacciones INTEGER
 )
 RETURNS (
@@ -2331,46 +2521,24 @@ RETURNS (
 AS
 BEGIN
     SELECT 
-        id,
-        id_usuario,
-        presupuesto_id,
-        anio,
-        mes,
-        subcategoria_id,
-        obligacion_id,
-        tipo,
-        descripcion,
-        monto,
-        fecha,
-        metodo_pago,
-        no_factura,
-        observaciones,
-        estado,
-        creado_en,
-        modificado_en,
-        creado_por,
-        modificado_por
+        id, id_usuario, presupuesto_id, anio, mes, 
+        subcategoria_id, obligacion_id, tipo, descripcion, 
+        monto, fecha, metodo_pago, no_factura, observaciones, 
+        estado, creado_en, modificado_en, creado_por, modificado_por
     FROM TRANSACCIONES
     WHERE id = :p_id_transacciones
     INTO 
-        :id,
-        :id_usuario,
-        :presupuesto_id,
-        :anio,
-        :mes,
-        :subcategoria_id,
-        :obligacion_id,
-        :descripcion,
-        :monto,
-        :fecha,
-        :no_factura,
-        :creado_en,
-        :modificado_en,
-        :creado_por,
-        :modificado_por;
+        :id, :id_usuario, :presupuesto_id, :anio, :mes, 
+        :subcategoria_id, :obligacion_id, :tipo, :descripcion, 
+        :monto, :fecha, :metodo_pago, :no_factura, :observaciones, 
+        :estado, :creado_en, :modificado_en, :creado_por, :modificado_por;
+
     IF (id IS NOT NULL) THEN
+    BEGIN
         SUSPEND;
-END
+    END
+END#
+
 
 
 -- SP_ACTUALIZAR_TRANSACCIONES
@@ -2413,7 +2581,7 @@ BEGIN
         modificado_en = CURRENT_TIMESTAMP,
         modificado_por = :p_modificado_por
     WHERE id = :p_id_transacciones;
-END
+END#
 
 
 CREATE PROCEDURE SP_INSERTAR_USUARIO (
@@ -2472,6 +2640,38 @@ BEGIN
         SUSPEND;
 END#
 
+CREATE PROCEDURE SP_LOGIN_USUARIO (
+    p_correo_electronico VARCHAR(255)
+) RETURNS (
+    id_usuario INTEGER,
+    nombre VARCHAR(255),
+    apellido VARCHAR(255),
+    correo_electronico VARCHAR(255),
+    salario_mensual_base NUMERIC(15, 2),
+    estado VARCHAR(20)
+) AS
+BEGIN
+    SELECT id_usuario,
+           nombre,
+           apellido,
+           correo_electronico,
+           salario_mensual_base,
+           estado
+    FROM USUARIO
+    WHERE LOWER(correo_electronico) = LOWER(:p_correo_electronico)
+    ROWS 1
+    INTO :id_usuario,
+         :nombre,
+         :apellido,
+         :correo_electronico,
+         :salario_mensual_base,
+         :estado;
+
+    IF (id_usuario IS NOT NULL) THEN
+        SUSPEND;
+END#
+
+
 CREATE PROCEDURE SP_CONSULTAR_USUARIO (
     p_id_usuario INTEGER
 ) RETURNS (
@@ -2505,103 +2705,6 @@ BEGIN
         salario_mensual_base = :p_salario_mensual,
         modificado_en = CURRENT_TIMESTAMP
     WHERE id_usuario = :p_id_usuario;
-END#
-
-
-CREATE PROCEDURE SP_CALCULAR_TOTALES_PRESUPUESTO_PERIODO (
-    p_id_usuario INTEGER,
-    p_id_presupuesto INTEGER,
-    p_anio_inicio INTEGER,
-    p_mes_inicio INTEGER,
-    p_anio_fin INTEGER,
-    p_mes_fin INTEGER
-)
-RETURNS (
-    anio INTEGER,
-    mes INTEGER,
-    mes_nombre VARCHAR(20),
-    total_ingresos NUMERIC(15, 2),
-    total_gastos NUMERIC(15, 2),
-    total_ahorros NUMERIC(15, 2),
-    balance_final NUMERIC(15, 2)
-)
-AS
-DECLARE VARIABLE v_presupuesto_usuario INTEGER;
-DECLARE VARIABLE v_estado VARCHAR(20);
-DECLARE VARIABLE v_current_anio INTEGER;
-DECLARE VARIABLE v_current_mes INTEGER;
-DECLARE VARIABLE v_clave_actual INTEGER;
-DECLARE VARIABLE v_clave_fin INTEGER;
-DECLARE VARIABLE v_total_ing NUMERIC(15, 2);
-DECLARE VARIABLE v_total_gas NUMERIC(15, 2);
-DECLARE VARIABLE v_total_aho NUMERIC(15, 2);
-BEGIN
-    -- Validar que el presupuesto existe y pertenece al usuario
-    SELECT id_usuario, estado
-    FROM PRESUPUESTO
-    WHERE id_presupuesto = :p_id_presupuesto
-    INTO :v_presupuesto_usuario, :v_estado;
-
-    IF (v_presupuesto_usuario IS NULL) THEN
-        EXCEPTION ex_presupuesto_no_encontrado;
-
-    IF (v_presupuesto_usuario <> p_id_usuario) THEN
-        EXCEPTION ex_presupuesto_usuario;
-
-    -- Inicializar variables de iteración
-    v_current_anio = :p_anio_inicio;
-    v_current_mes = :p_mes_inicio;
-    v_clave_fin = :p_anio_fin * 100 + :p_mes_fin;
-
-    -- Iterar sobre cada mes del período
-    WHILE (v_current_anio * 100 + v_current_mes <= v_clave_fin) DO
-    BEGIN
-        -- Calcular totales del mes actual
-        SELECT
-            COALESCE(SUM(CASE WHEN tipo = 'ingreso' THEN monto ELSE 0 END), 0),
-            COALESCE(SUM(CASE WHEN tipo = 'gasto' THEN monto ELSE 0 END), 0),
-            COALESCE(SUM(CASE WHEN tipo = 'ahorro' THEN monto ELSE 0 END), 0)
-        FROM TRANSACCIONES
-        WHERE id_usuario = :p_id_usuario
-          AND presupuesto_id = :p_id_presupuesto
-          AND anio = :v_current_anio
-          AND mes = :v_current_mes
-          AND estado = 'activo'
-        INTO :v_total_ing, :v_total_gas, :v_total_aho;
-
-        -- Asignar valores a los campos de retorno
-        anio = :v_current_anio;
-        mes = :v_current_mes;
-        total_ingresos = :v_total_ing;
-        total_gastos = :v_total_gas;
-        total_ahorros = :v_total_aho;
-        balance_final = :v_total_ing - :v_total_gas - :v_total_aho;
-
-        -- Asignar nombre del mes
-        IF (v_current_mes = 1) THEN mes_nombre = 'Enero';
-        ELSE IF (v_current_mes = 2) THEN mes_nombre = 'Febrero';
-        ELSE IF (v_current_mes = 3) THEN mes_nombre = 'Marzo';
-        ELSE IF (v_current_mes = 4) THEN mes_nombre = 'Abril';
-        ELSE IF (v_current_mes = 5) THEN mes_nombre = 'Mayo';
-        ELSE IF (v_current_mes = 6) THEN mes_nombre = 'Junio';
-        ELSE IF (v_current_mes = 7) THEN mes_nombre = 'Julio';
-        ELSE IF (v_current_mes = 8) THEN mes_nombre = 'Agosto';
-        ELSE IF (v_current_mes = 9) THEN mes_nombre = 'Septiembre';
-        ELSE IF (v_current_mes = 10) THEN mes_nombre = 'Octubre';
-        ELSE IF (v_current_mes = 11) THEN mes_nombre = 'Noviembre';
-        ELSE mes_nombre = 'Diciembre';
-
-        SUSPEND;
-
-        -- Avanzar al siguiente mes
-        IF (v_current_mes = 12) THEN
-        BEGIN
-            v_current_anio = v_current_anio + 1;
-            v_current_mes = 1;
-        END
-        ELSE
-            v_current_mes = v_current_mes + 1;
-    END
 END#
 
 SET TERM ;#
