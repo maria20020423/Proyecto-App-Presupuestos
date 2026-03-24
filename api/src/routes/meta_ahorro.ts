@@ -6,10 +6,9 @@ import type { UpdateMetaAhorroDto } from '../types/dto/meta_ahorro/update_meta_a
 export default (metaAhorroService: MetaAhorroService): Router => {
   const router = Router();
 
-  router.get('/', async (req, res) => {
+  router.get('/', async (_req, res) => {
     try {
-      const id_usuario = req.query.id_usuario ? Number(req.query.id_usuario) : undefined;
-      const results = await metaAhorroService.getMetas(id_usuario);
+      const results = await metaAhorroService.getMetas();
       return res.status(200).json({ message: 'Fetching metas de ahorro', results });
     } catch (error) {
       return res.status(500).json({ message: 'Error fetching metas de ahorro', error: `${error}` });
@@ -19,8 +18,7 @@ export default (metaAhorroService: MetaAhorroService): Router => {
   router.get('/:id_meta_ahorro', async (req, res) => {
     try {
       const id_meta_ahorro = parseInt(req.params.id_meta_ahorro, 10);
-      const id_usuario = req.query.id_usuario ? Number(req.query.id_usuario) : undefined;
-      const result = await metaAhorroService.getMetaById(id_meta_ahorro, id_usuario);
+      const result = await metaAhorroService.getMetaById(id_meta_ahorro);
       if (!result) {
         return res.status(404).json({ message: 'Meta de ahorro not found' });
       }

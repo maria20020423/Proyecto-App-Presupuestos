@@ -121,8 +121,9 @@ export default function MetasAhorroPage() {
     }
     try {
       setLoading(true);
-      const response = await metaAhorroService.getAll(userId);
-      setMetas(response.results ?? []);
+      const response = await metaAhorroService.getAll();
+      const userMetas = (response.results ?? []).filter((meta) => meta.id_usuario === userId);
+      setMetas(userMetas);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudieron cargar las metas de ahorro");

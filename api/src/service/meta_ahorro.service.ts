@@ -10,7 +10,7 @@ export default class MetaAhorroService {
         this.firebird_client = firebird_client;
     }
 
-    public async getMetas(id_usuario?: number): Promise<GetMetaAhorroResult[]> {
+    public async getMetas(): Promise<GetMetaAhorroResult[]> {
         const transaction = await this.firebird_client.startTransaction();
         try {
             const resultSet = await this.firebird_client.executeQuery(
@@ -20,9 +20,6 @@ export default class MetaAhorroService {
             const rows = await resultSet.fetchAsObject<GetMetaAhorroResult>();
             await resultSet.close();
             await transaction.commit();
-            if (typeof id_usuario === 'number') {
-                return rows.filter((row) => row.id_usuario === id_usuario);
-            }
             return rows;
         } catch (err) {
             await transaction.rollback();
@@ -30,7 +27,7 @@ export default class MetaAhorroService {
         }
     }
 
-    public async getMetaById(id_meta_ahorro: number, id_usuario?: number): Promise<GetMetaAhorroResult | null> {
+    public async getMetaById(id_meta_ahorro: number): Promise<GetMetaAhorroResult | null> {
         const transaction = await this.firebird_client.startTransaction();
         try {
             const resultSet = await this.firebird_client.executeQuery(
@@ -41,11 +38,7 @@ export default class MetaAhorroService {
             const rows = await resultSet.fetchAsObject<GetMetaAhorroResult>();
             await resultSet.close();
             await transaction.commit();
-            const meta = rows.at(0) ?? null;
-            if (meta && typeof id_usuario === 'number' && meta.id_usuario !== id_usuario) {
-                return null;
-            }
-            return meta;
+            return rows.at(0) ?? null;
         } catch (err) {
             await transaction.rollback();
             throw new Error(`Error fetching meta de ahorro: ${err}`);

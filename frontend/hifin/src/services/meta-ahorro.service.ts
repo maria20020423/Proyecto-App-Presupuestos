@@ -26,12 +26,8 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
 }
 
 export const metaAhorroService = {
-  async getAll(id_usuario?: number): Promise<MetaAhorroListResponse> {
-    const params = new URLSearchParams();
-    if (id_usuario) params.append("id_usuario", id_usuario.toString());
-    const query = params.toString();
-    const endpoint = query ? `/meta-ahorro?${query}` : "/meta-ahorro";
-    return fetchApi<MetaAhorroListResponse>(endpoint);
+  async getAll(): Promise<MetaAhorroListResponse> {
+    return fetchApi<MetaAhorroListResponse>("/meta-ahorro");
   },
 
   async create(id_usuario: number, payload: CreateMetaAhorroDto): Promise<CreateMetaAhorroResponse> {
