@@ -53,4 +53,9 @@ EXIT;
 
 ```
 
+### SCRIPT para DLL:
+```bash
+bash ./create_dll.sh
+
+```
 
