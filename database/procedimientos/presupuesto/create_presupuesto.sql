@@ -17,7 +17,21 @@ RETURNS (
     nuevo_id_presupuesto INTEGER
 )
 AS
+DECLARE VARIABLE v_overlap INTEGER;
 BEGIN
+        -- Verificar que no exista un presupuesto con el mismo rango de fechas para el mismo usuario
+    SELECT COUNT(*)
+    FROM PRESUPUESTO
+    WHERE id_usuario = :id_usuario
+        AND (anio_inicio < :anio_fin OR (anio_inicio = :anio_fin AND mes_inicio <= :mes_fin))
+        AND (anio_fin > :anio_inicio OR (anio_fin = :anio_inicio AND mes_fin >= :mes_inicio))
+        AND estado = 'activo'
+    INTO :v_overlap;
+
+    IF (:v_overlap > 0) THEN
+        EXCEPTION EX_PRESUPUESTO_TRASLAPADO;
+
+
     INSERT INTO PRESUPUESTO (
         id_usuario, nombre_presupuesto, anio_inicio, mes_inicio, anio_fin, mes_fin,
         total_ingresos_planificados, total_gastos_planificados, total_ahorro_planificado,
