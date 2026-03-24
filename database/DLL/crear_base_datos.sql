@@ -147,6 +147,102 @@ CREATE TABLE USUARIO (
 )#
 
 
+
+ALTER TABLE SUBCATEGORIA
+ADD CONSTRAINT FK_SUBCATEGORIA_CATEGORIA
+FOREIGN KEY (categoria_id) REFERENCES CATEGORIA(id)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+ALTER TABLE CATEGORIA
+ADD CONSTRAINT FK_CATEGORIA_USUARIO
+FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+
+ALTER TABLE PRESUPUESTO
+ADD CONSTRAINT FK_PRESUPUESTO_USUARIO
+FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+
+
+ALTER TABLE META_AHORRO
+ADD CONSTRAINT FK_META_AHORRO_USUARIO
+FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+ALTER TABLE DETALLE_PRESUPUESTO
+ADD CONSTRAINT FK_DETALLE_PRESUPUESTO_PRESUPUESTO
+FOREIGN KEY (presupuesto_id) REFERENCES PRESUPUESTO(id_presupuesto)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+ALTER TABLE DETALLE_PRESUPUESTO
+ADD CONSTRAINT FK_DETALLE_PRESUPUESTO_SUBCATEGORIA
+FOREIGN KEY (subcategoria_id) REFERENCES SUBCATEGORIA(id)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+
+ALTER TABLE OBLIGACION_FIJA
+ADD CONSTRAINT FK_OBLIGACION_FIJA_USUARIO
+FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+
+ALTER TABLE OBLIGACION_FIJA
+ADD CONSTRAINT FK_OBLIGACION_FIJA_SUBCATEGORIA
+FOREIGN KEY (subcategoria_id) REFERENCES SUBCATEGORIA(id)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+ALTER TABLE TRANSACCIONES
+ADD CONSTRAINT FK_TRANSACCIONES_USUARIO
+FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+ALTER TABLE TRANSACCIONES
+ADD CONSTRAINT FK_TRANSACCIONES_PRESUPUESTO
+FOREIGN KEY (presupuesto_id) REFERENCES PRESUPUESTO(id_presupuesto)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+ALTER TABLE TRANSACCIONES
+ADD CONSTRAINT FK_TRANSACCIONES_SUBCATEGORIA
+FOREIGN KEY (subcategoria_id) REFERENCES SUBCATEGORIA(id)
+ON DELETE CASCADE ON UPDATE CASCADE#
+
+ALTER TABLE TRANSACCIONES
+ADD CONSTRAINT FK_TRANSACCIONES_OBLIGACION_FIJA
+FOREIGN KEY (obligacion_id) REFERENCES OBLIGACION_FIJA(id)
+ON DELETE SET NULL ON UPDATE CASCADE#
+
+
+CREATE EXCEPTION EX_CATEGORIA_CON_SUBCATEGORIAS 'La categoria tiene subcategorias activas adicionales'#
+CREATE EXCEPTION EX_CATEGORIA_NO_DEFAULT 'No existe subcategoria por defecto'#
+CREATE EXCEPTION EX_CATEGORIA_NO_ENCONTRADA 'Categoria no encontrada'#
+CREATE EXCEPTION EX_SUBCATEGORIA_DEFAULT_EXISTENTE 'Ya existe una subcategoria por defecto'#
+CREATE EXCEPTION EX_CATEGORIA_SIN_SUBCATEGORIA 'La categoria debe mantener al menos una subcategoria activa'#
+CREATE EXCEPTION EX_SUBCATEGORIA_NO_ENCONTRADA 'Subcategoria no encontrada'#
+CREATE EXCEPTION EX_SUBCATEGORIA_DEFAULT_NO_ELIMINAR 'No se puede eliminar la subcategoria por defecto'#
+CREATE EXCEPTION EX_SUBCATEGORIA_USADA_DETALLE 'La subcategoria se utiliza en detalle de presupuesto'#
+CREATE EXCEPTION EX_SUBCATEGORIA_USADA_TRANSACCION 'La subcategoria se utiliza en transacciones'#
+CREATE EXCEPTION EX_PRESUPUESTO_CON_TRANSACCIONES 'No se puede eliminar el presupuesto porque tiene transacciones asociadas'#
+CREATE EXCEPTION EX_PRESUPUESTO_VIGENCIA 'Periodo de vigencia invalido para el presupuesto'#
+CREATE EXCEPTION EX_PRESUPUESTO_TRASLAPADO 'Ya existe un presupuesto activo en el rango seleccionado'#
+CREATE EXCEPTION EX_PRESUPUESTO_NO_ENCONTRADO 'Presupuesto no encontrado'#
+CREATE EXCEPTION EX_PRESUPUESTO_USUARIO 'El presupuesto no pertenece al usuario indicado'#
+CREATE EXCEPTION EX_PRESUPUESTO_ESTADO 'El presupuesto no se encuentra en estado activo'#
+CREATE EXCEPTION EX_PRESUPUESTO_FUERA_VIGENCIA 'El periodo indicado esta fuera de la vigencia del presupuesto'#
+CREATE EXCEPTION EX_PRESUPUESTO_NO_FINALIZADO 'El presupuesto aun no ha finalizado su vigencia'#
+CREATE EXCEPTION EX_TRANSACCION_TIPO_INVALIDO 'Tipo de transaccion invalido'#
+CREATE EXCEPTION EX_TRANSACCION_MONTO_INVALIDO 'El monto de la transaccion debe ser mayor que cero'#
+CREATE EXCEPTION EX_TRANSACCION_MES_INVALIDO 'El mes indicado para la transaccion no es valido'#
+CREATE EXCEPTION EX_TRANSACCION_CATEGORIA_INVALIDA 'La subcategoria no pertenece al usuario o su tipo no coincide'#
+CREATE EXCEPTION EX_TRANSACCION_OBLIGACION_INVALIDA 'La obligacion indicada no es valida para la transaccion'#
+CREATE EXCEPTION EX_TRANSACCION_FECHA_FUERA_RANGO 'La fecha de la transaccion cae fuera de la vigencia del presupuesto'#
+CREATE EXCEPTION EX_OBLIGACION_NO_ENCONTRADA 'Obligacion fija no encontrada'#
+CREATE EXCEPTION EX_OBLIGACION_SIN_DETALLE 'La obligacion no tiene detalle configurado en el presupuesto'#
+CREATE EXCEPTION EX_OBLIGACION_SIN_SUBCATEGORIA 'Toda obligacion debe tener una subcategoria asociada'#
+CREATE EXCEPTION EX_OBLIGACION_FECHA_FINAL_INVALIDA 'La fecha de finalizacion debe ser mayor que la fecha de inicio'#
+CREATE EXCEPTION EX_OBLIGACION_SUBCATEGORIA_TIPO_INVALIDO 'Una obligacion fija solo puede estar asociada a subcategorias de categorias de tipo gasto'#
+
 CREATE FUNCTION FN_CALCULAR_MONTO_EJECUTADO (
     p_id_subcategoria INTEGER,
     p_id_presupuesto INTEGER,
@@ -1308,47 +1404,60 @@ CREATE PROCEDURE SP_INSERTAR_PRESUPUESTO (
     mes_inicio INTEGER,
     anio_fin INTEGER,
     mes_fin INTEGER,
-    total_ingresos_planificados NUMERIC(15,2),
-    total_gastos_planificados NUMERIC(15,2),
-    total_ahorro_planificado NUMERIC(15,2),
+    total_ingresos_planificados NUMERIC(15, 2),
+    total_gastos_planificados NUMERIC(15, 2),
+    total_ahorro_planificado NUMERIC(15, 2),
     fecha_creacion TIMESTAMP,
     estado VARCHAR(20),
     creado_en TIMESTAMP,
     creado_por INTEGER
-)
-RETURNS (
-    nuevo_id_presupuesto INTEGER
-)
-AS
+) RETURNS (nuevo_id_presupuesto INTEGER) AS
 DECLARE VARIABLE v_overlap INTEGER;
-BEGIN
-        -- Verificar que no exista un presupuesto con el mismo rango de fechas para el mismo usuario
-    SELECT COUNT(*)
-    FROM PRESUPUESTO
-    WHERE id_usuario = :id_usuario
-        AND (anio_inicio < :anio_fin OR (anio_inicio = :anio_fin AND mes_inicio <= :mes_fin))
-        AND (anio_fin > :anio_inicio OR (anio_fin = :anio_inicio AND mes_fin >= :mes_inicio))
-        AND estado = 'activo'
-    INTO :v_overlap;
 
-    IF (:v_overlap > 0) THEN
-        EXCEPTION EX_PRESUPUESTO_TRASLAPADO;
+BEGIN 
+SELECT COUNT(*)
+FROM PRESUPUESTO
+WHERE id_usuario = :id_usuario
+    AND estado = 'activo'
 
+    AND (anio_inicio * 100 + mes_inicio) <= (:anio_fin * 100 + :mes_fin)
+    AND (anio_fin * 100 + mes_fin) >= (:anio_inicio * 100 + :mes_inicio) INTO :v_overlap;
 
-    INSERT INTO PRESUPUESTO (
-        id_usuario, nombre_presupuesto, anio_inicio, mes_inicio, anio_fin, mes_fin,
-        total_ingresos_planificados, total_gastos_planificados, total_ahorro_planificado,
-        fecha_creacion, estado, creado_en, creado_por
+IF (:v_overlap > 0) THEN EXCEPTION EX_PRESUPUESTO_TRASLAPADO;
+
+INSERT INTO PRESUPUESTO (
+        id_usuario,
+        nombre_presupuesto,
+        anio_inicio,
+        mes_inicio,
+        anio_fin,
+        mes_fin,
+        total_ingresos_planificados,
+        total_gastos_planificados,
+        total_ahorro_planificado,
+        fecha_creacion,
+        estado,
+        creado_en,
+        creado_por
     )
-    VALUES (
-        :id_usuario, :nombre_presupuesto, :anio_inicio, :mes_inicio, :anio_fin, :mes_fin,
-        :total_ingresos_planificados, :total_gastos_planificados, :total_ahorro_planificado,
-        :fecha_creacion, :estado, :creado_en, :creado_por
+VALUES (
+        :id_usuario,
+        :nombre_presupuesto,
+        :anio_inicio,
+        :mes_inicio,
+        :anio_fin,
+        :mes_fin,
+        :total_ingresos_planificados,
+        :total_gastos_planificados,
+        :total_ahorro_planificado,
+        :fecha_creacion,
+        :estado,
+        :creado_en,
+        :creado_por
     )
-    RETURNING id_presupuesto INTO nuevo_id_presupuesto;
-    SUSPEND;
-END#
-
+RETURNING id_presupuesto INTO nuevo_id_presupuesto;
+SUSPEND;
+END #
 
 CREATE PROCEDURE SP_ELIMINAR_PRESUPUESTO (
     id_presupuesto INTEGER
