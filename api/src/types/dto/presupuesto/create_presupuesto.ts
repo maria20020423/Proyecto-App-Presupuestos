@@ -7,11 +7,11 @@ export interface CreatePresupuestoDto {
     mes_inicio: number;
     anio_fin: number;
     mes_fin: number;
-    total_ingresos_planificados: number;
-    total_gastos_planificados: number;
-    total_ahorro_planificado: number;
-    fecha_creacion: string;
-    estado: PresupuestoEstado;
-    creado_en: string;
+    total_ingresos_planificados?: number | null;
+    total_gastos_planificados?: number | null;
+    total_ahorro_planificado?: number | null;
+    fecha_creacion?: string | null;
+    estado?: PresupuestoEstado | null;
+    creado_en?: string | null;
     creado_por: number;
 }

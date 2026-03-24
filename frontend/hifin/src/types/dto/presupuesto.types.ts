@@ -25,24 +25,24 @@ export interface CreatePresupuestoDto {
   mes_inicio: number;
   anio_fin: number;
   mes_fin: number;
-  total_ingresos_planificados: number;
-  total_gastos_planificados: number;
-  total_ahorro_planificado: number;
-  fecha_creacion: string;
-  estado: PresupuestoEstado;
-  creado_en: string;
+  total_ingresos_planificados?: number | null;
+  total_gastos_planificados?: number | null;
+  total_ahorro_planificado?: number | null;
+  fecha_creacion?: string | null;
+  estado?: PresupuestoEstado | null;
+  creado_en?: string | null;
 }
 
 export interface UpdatePresupuestoDto {
-  nombre_presupuesto: string;
-  anio_inicio: number;
-  mes_inicio: number;
-  anio_fin: number;
-  mes_fin: number;
-  total_ingresos_planificados: number;
-  total_gastos_planificados: number;
-  total_ahorro_planificado: number;
-  estado: PresupuestoEstado;
+  nombre_presupuesto?: string | null;
+  anio_inicio?: number | null;
+  mes_inicio?: number | null;
+  anio_fin?: number | null;
+  mes_fin?: number | null;
+  total_ingresos_planificados?: number | null;
+  total_gastos_planificados?: number | null;
+  total_ahorro_planificado?: number | null;
+  estado?: PresupuestoEstado | null;
 }
 
 export interface PresupuestoListResponse {
