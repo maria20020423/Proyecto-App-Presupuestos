@@ -18,9 +18,14 @@ const INITIAL_FORM: CreatePresupuestoDto = {
   total_gastos_planificados: 0,
   total_ahorro_planificado: 0,
   fecha_creacion: new Date().toISOString(),
-  estado: "borrador",
+  estado: "activo",
   creado_en: new Date().toISOString(),
 };
+
+const estadoOptions: Array<{ value: PresupuestoEstado; label: string; description: string }> = [
+  { value: "activo", label: "Activo", description: "Disponible inmediatamente para registrar movimientos." },
+  { value: "borrador", label: "Borrador", description: "Solo planificación: podrás activarlo más tarde." },
+];
 
 const currencyFormatter = new Intl.NumberFormat("es-HN", {
   style: "currency",
@@ -235,17 +240,6 @@ export default function PresupuestosPage() {
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-600">Descripción</label>
-                <input
-                  type="text"
-                  value={""}
-                  onChange={(e) => console.log("Descripción no es requerida en CreatePresupuestoDto")}
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Objetivo del plan"
-                  disabled
-                />
-              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -296,6 +290,30 @@ export default function PresupuestosPage() {
                   max={12}
                   required
                 />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-slate-600">Estado inicial</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {estadoOptions.map((option) => {
+                  const isSelected = formData.estado === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setFormData((prev) => ({ ...prev, estado: option.value }))}
+                      className={`rounded-2xl border px-4 py-3 text-left transition ${
+                        isSelected
+                          ? "border-blue-500 bg-blue-50 text-blue-900 shadow-lg"
+                          : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                      }`}
+                    >
+                      <p className="font-semibold">{option.label}</p>
+                      <p className="text-sm mt-1 opacity-80">{option.description}</p>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

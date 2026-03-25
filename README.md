@@ -8,6 +8,7 @@ docker compose -up --build
 ## Instalar:
 ```
 sudo apt install libwbclient-dev
+apt-get install -y build-essential python3  firebird-dev
 ```
 
 

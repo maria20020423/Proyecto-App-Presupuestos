@@ -49,11 +49,17 @@ export default class PresupuestoService {
             presupuesto.anio_fin,
             presupuesto.mes_fin
         );
-        this.validateTotales(
-            presupuesto.total_ingresos_planificados,
-            presupuesto.total_gastos_planificados,
-            presupuesto.total_ahorro_planificado
-        );
+        if (
+            presupuesto.total_ingresos_planificados != null &&
+            presupuesto.total_gastos_planificados != null &&
+            presupuesto.total_ahorro_planificado != null
+        ) {
+            this.validateTotales(
+                presupuesto.total_ingresos_planificados,
+                presupuesto.total_gastos_planificados,
+                presupuesto.total_ahorro_planificado
+            );
+        }
 
         const transaction = await this.firebird_client.startTransaction();
         try {
@@ -64,28 +70,28 @@ export default class PresupuestoService {
                 presupuesto.mes_inicio,
                 presupuesto.anio_fin,
                 presupuesto.mes_fin,
-                presupuesto.total_ingresos_planificados,
-                presupuesto.total_gastos_planificados,
-                presupuesto.total_ahorro_planificado,
-                new Date(presupuesto.fecha_creacion),
-                presupuesto.estado,
-                new Date(presupuesto.creado_en),
+                presupuesto.total_ingresos_planificados ?? null,
+                presupuesto.total_gastos_planificados ?? null,
+                presupuesto.total_ahorro_planificado ?? null,
+                presupuesto.fecha_creacion ? new Date(presupuesto.fecha_creacion) : null,
+                presupuesto.estado ?? 'activo',
+                presupuesto.creado_en ? new Date(presupuesto.creado_en) : new Date(),
                 presupuesto.creado_por
             ];
 
             const resultSet = await this.firebird_client.executeQuery(
                 transaction,
-                `EXECUTE PROCEDURE SP_INSERTAR_PRESUPUESTO (
+                `SELECT * FROM SP_INSERTAR_PRESUPUESTO(
                     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-                )`,
+                );`,
                 parameters
             );
 
             const rows = await resultSet.fetch();
             await resultSet.close();
             await transaction.commit();
-                if (!rows[0] || !rows[0][0]) {
-                throw new Error('No se pudo obtener el ID de la categoria creada');
+            if (!rows[0] || !rows[0][0]) {
+                throw new Error('No se pudo obtener el ID del presupuesto creado');
             }
             return rows[0][0];
         } catch (err) {
@@ -130,36 +136,41 @@ export default class PresupuestoService {
             presupuesto.anio_fin,
             presupuesto.mes_fin
         );
-        this.validateTotales(
-            presupuesto.total_ingresos_planificados,
-            presupuesto.total_gastos_planificados,
-            presupuesto.total_ahorro_planificado
-        );
+        if (
+            presupuesto.total_ingresos_planificados != null &&
+            presupuesto.total_gastos_planificados != null &&
+            presupuesto.total_ahorro_planificado != null
+        ) {
+            this.validateTotales(
+                presupuesto.total_ingresos_planificados,
+                presupuesto.total_gastos_planificados,
+                presupuesto.total_ahorro_planificado
+            );
+        }
 
         const transaction = await this.firebird_client.startTransaction();
         try {
             const parameters = [
                 id_presupuesto,
-                presupuesto.id_usuario,
-                presupuesto.nombre_presupuesto,
-                presupuesto.anio_inicio,
-                presupuesto.mes_inicio,
-                presupuesto.anio_fin,
-                presupuesto.mes_fin,
-                presupuesto.total_ingresos_planificados,
-                presupuesto.total_gastos_planificados,
-                presupuesto.total_ahorro_planificado,
-                presupuesto.estado,
+                presupuesto.id_usuario ?? null,
+                presupuesto.nombre_presupuesto ?? null,
+                presupuesto.anio_inicio ?? null,
+                presupuesto.mes_inicio ?? null,
+                presupuesto.anio_fin ?? null,
+                presupuesto.mes_fin ?? null,
+                presupuesto.total_ingresos_planificados ?? null,
+                presupuesto.total_gastos_planificados ?? null,
+                presupuesto.total_ahorro_planificado ?? null,
+                presupuesto.estado ?? null,
                 new Date(),
                 presupuesto.modificado_por
-
             ];
 
             await this.firebird_client.execute(
                 transaction,
-                `EXECUTE PROCEDURE SP_ACTUALIZAR_PRESUPUESTO (
+                `EXECUTE PROCEDURE SP_ACTUALIZAR_PRESUPUESTO(
                     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-                )`,
+                );`,
                 parameters
             );
 
